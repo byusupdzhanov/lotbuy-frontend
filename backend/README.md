@@ -25,6 +25,7 @@ The server expects the following variables:
 | `LOTBUY_HTTP_ADDR` | Address/port to bind the API server | `:8080` |
 | `LOTBUY_AUTH_SECRET` | HMAC secret for signing auth tokens | `dev-secret-change-me` |
 
+
 ### Database schema
 
 Apply the migrations in the `migrations/` folder before running the server. A simple example with the `psql` CLI:
@@ -36,7 +37,6 @@ psql "$LOTBUY_DATABASE_URL" -f migrations/0001_init.sql
 The initial schema creates the following tables:
 
 - `users` — registered marketplace accounts with secure password hashes, display name, avatar, and role (`buyer` or `seller`).
-
 - `requests` — purchase intents created by buyers, including budget, currency, and buyer profile information.
 - `offers` — seller proposals attached to a request.
 - `deals` — binding agreements generated when a buyer accepts an offer. Stores status, total amount, currency, due dates, and the latest communication summary.

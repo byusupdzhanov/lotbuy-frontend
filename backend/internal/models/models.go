@@ -113,3 +113,4 @@ func (u User) Public() PublicUser {
 		AvatarURL: u.AvatarURL,
 	}
 }
+

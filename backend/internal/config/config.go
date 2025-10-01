@@ -9,6 +9,7 @@ type Config struct {
 	HTTPAddr    string
 	DatabaseURL string
 	AuthSecret  string
+
 }
 
 func Load() (Config, error) {
@@ -30,6 +31,5 @@ func Load() (Config, error) {
 		secret = "dev-secret-change-me"
 	}
 	cfg.AuthSecret = secret
-
 	return cfg, nil
 }

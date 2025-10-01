@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"time"
 
@@ -97,7 +98,7 @@ func (s *Store) GetDealDetails(ctx context.Context, id int64) (*models.DealDetai
 }
 
 func (s *Store) CreateDealFromOffer(ctx context.Context, offerID int64) (*models.DealDetails, error) {
-	tx, err := s.db.BeginTxx(ctx, &sqlx.TxOptions{})
+	tx, err := s.db.BeginTxx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
 	}
