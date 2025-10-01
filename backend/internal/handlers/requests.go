@@ -60,7 +60,6 @@ func (a *API) handleCreateRequest(w http.ResponseWriter, r *http.Request) {
 	if buyerName == "" {
 		buyerName = user.Email
 	}
-
 	var deadline *time.Time
 	if payload.DeadlineAt != nil {
 		trimmed := strings.TrimSpace(*payload.DeadlineAt)
@@ -418,4 +417,3 @@ func (a *API) handleDeleteRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
