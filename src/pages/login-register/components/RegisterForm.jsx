@@ -83,27 +83,45 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
     }
 
     setIsLoading(true);
+    setErrors((prev) => ({ ...prev, submit: '' }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const userData = {
-        id: Date.now(),
-        email: formData.email,
-        name: `${formData.firstName} ${formData.lastName}`,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        role: formData.userType,
-        avatar: `https://randomuser.me/api/portraits/${formData.userType === 'buyer' ? 'men' : 'women'}/${Math.floor(Math.random() * 50) + 1}.jpg`,
-        isNewUser: true
-      };
-      
-      onSuccess(userData);
-      
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          userType: formData.userType
+        })
+      });
+
+      let payload = null;
+      try {
+        payload = await response.clone().json();
+      } catch (jsonError) {
+        payload = null;
+      }
+
+      if (!response.ok) {
+        const message = typeof payload?.error === 'string'
+          ? payload.error
+          : 'Registration failed. Please try again.';
+        setErrors({ submit: message });
+        return;
+      }
+
+      if (payload) {
+        onSuccess(payload);
+      }
+
     } catch (error) {
       console.error('Registration error:', error);
-      setErrors({ submit: 'An error occurred during registration. Please try again.' });
+      setErrors({ submit: 'Unable to reach the server. Please try again.' });
     } finally {
       setIsLoading(false);
     }

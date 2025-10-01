@@ -1,23 +1,41 @@
-import React from 'react';
+import React, { forwardRef, memo, useMemo, useState } from 'react';
 
-function Image({
-  src,
-  alt = "Image Name",
-  className = "",
-  ...props
-}) {
+const defaultFallback = '/assets/images/no_image.png';
+
+const AppImage = forwardRef(function AppImage(
+  { src, alt = 'Image', className = '', fallback = defaultFallback, onError, ...props },
+  ref
+) {
+  const [failed, setFailed] = useState(false);
+
+  const resolvedSrc = useMemo(() => {
+    if (!failed && src) {
+      return src;
+    }
+    return fallback || defaultFallback;
+  }, [failed, fallback, src]);
+
+  const handleError = (event) => {
+    if (onError) {
+      onError(event);
+    }
+    if (!failed && src && src !== fallback) {
+      setFailed(true);
+    }
+  };
 
   return (
     <img
-      src={src}
+      ref={ref}
+      src={resolvedSrc}
       alt={alt}
       className={className}
-      onError={(e) => {
-        e.target.src = "/assets/images/no_image.png"
-      }}
+      onError={handleError}
       {...props}
     />
   );
-}
+});
 
-export default Image;
+AppImage.displayName = 'AppImage';
+
+export default memo(AppImage);

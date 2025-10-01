@@ -22,25 +22,27 @@ const QuickStats = ({ stats = {} }) => {
       color: 'text-success-500',
       bgColor: 'bg-success-50',
       description: 'Offers to review',
-      onClick: () => navigate('/lot-details-offers')
+      onClick: () => navigate('/dashboard-home')
     },
     {
       key: 'ongoingDeals',
+      fallbackKey: 'activeDeals',
       label: 'Ongoing Deals',
       icon: 'Handshake',
       color: 'text-accent-500',
       bgColor: 'bg-accent-50',
       description: 'Deals in progress',
-      onClick: () => navigate('/user-profile')
+      onClick: () => navigate('/deals')
     },
     {
       key: 'unreadMessages',
-      label: 'Unread Messages',
+      fallbackKey: 'incomingMessages',
+      label: 'Recent Messages',
       icon: 'MessageCircle',
       color: 'text-warning-500',
       bgColor: 'bg-warning-50',
-      description: 'New messages',
-      onClick: () => navigate('/user-profile')
+      description: 'New conversations',
+      onClick: () => navigate('/lot-details-offers')
     }
   ];
 
@@ -62,7 +64,7 @@ const QuickStats = ({ stats = {} }) => {
             
             <div className="space-y-1">
               <p className="text-2xl font-bold text-text-primary">
-                {stats[stat.key] || 0}
+                {stats[stat.key] ?? stats[stat.fallbackKey] ?? 0}
               </p>
               <p className="text-sm font-medium text-text-primary">
                 {stat.label}

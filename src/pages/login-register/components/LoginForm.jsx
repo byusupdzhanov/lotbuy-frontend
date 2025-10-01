@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Icon from 'components/AppIcon';
 
 const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -11,12 +9,6 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-
-  // Mock credentials for testing
-  const mockCredentials = {
-    email: 'demo@peerauction.com',
-    password: 'demo123'
-  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -45,8 +37,8 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
 
     setErrors(newErrors);
@@ -61,31 +53,41 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
     }
 
     setIsLoading(true);
+    setErrors((prev) => ({ ...prev, submit: '' }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Check mock credentials
-      if (formData.email === mockCredentials.email && formData.password === mockCredentials.password) {
-        const userData = {
-          id: 1,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           email: formData.email,
-          name: 'Demo User',
-          role: 'buyer',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
-        };
-        
-        onSuccess(userData);
-      } else {
-        setErrors({ 
-          submit: `Invalid credentials. Use email: ${mockCredentials.email} and password: ${mockCredentials.password}` 
-        });
+          password: formData.password
+        })
+      });
+
+      let payload = null;
+      try {
+        payload = await response.clone().json();
+      } catch (jsonError) {
+        payload = null;
       }
-      
+
+      if (!response.ok) {
+        const message = typeof payload?.error === 'string'
+          ? payload.error
+          : 'Invalid email or password';
+        setErrors({ submit: message });
+        return;
+      }
+
+      if (payload) {
+        onSuccess(payload);
+      }
     } catch (error) {
       console.error('Login error:', error);
-      setErrors({ submit: 'An error occurred. Please try again.' });
+      setErrors({ submit: 'Unable to reach the server. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +95,6 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
 
   const handleForgotPassword = () => {
     console.log('Forgot password clicked');
-    // In real app, navigate to forgot password page or show modal
   };
 
   return (
@@ -190,20 +191,6 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
           <p className="text-sm">{errors.submit}</p>
         </div>
       )}
-
-      {/* Demo Credentials Info */}
-      <div className="bg-primary-50 border border-primary-100 rounded-lg p-3">
-        <div className="flex items-start space-x-2">
-          <Icon name="Info" size={16} className="text-primary mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-primary">Demo Credentials</p>
-            <p className="text-xs text-primary-700 mt-1">
-              Email: {mockCredentials.email}<br />
-              Password: {mockCredentials.password}
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Submit Button */}
       <button

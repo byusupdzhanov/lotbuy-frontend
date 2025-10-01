@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 
 const LotInformation = ({ lot }) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -89,7 +89,7 @@ const LotInformation = ({ lot }) => {
       <div className="bg-surface border border-border rounded-lg p-4">
         <h3 className="text-lg font-semibold text-text-primary mb-3">Buyer Information</h3>
         <div className="flex items-center space-x-4">
-          <Image
+          <AppImage
             src={lot.buyer.avatar}
             alt={lot.buyer.name}
             className="w-12 h-12 rounded-full object-cover"

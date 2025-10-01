@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 
 const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
   const [selectedOffers, setSelectedOffers] = useState(offers.slice(0, 3));
@@ -109,7 +109,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <Image
+                        <AppImage
                           src={offer.seller.avatar}
                           alt={offer.seller.name}
                           className="w-8 h-8 rounded-full object-cover"
@@ -184,7 +184,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                           {/* Header */}
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3">
-                              <Image
+                              <AppImage
                                 src={offer.seller.avatar}
                                 alt={offer.seller.name}
                                 className="w-10 h-10 rounded-full object-cover"
