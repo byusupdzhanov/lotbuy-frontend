@@ -90,6 +90,7 @@ func (s *Store) GetDealDetails(ctx context.Context, id int64) (*models.DealDetai
                 Offer: models.OfferSummary{
                         ID:           offer.ID,
                         PriceAmount:  offer.PriceAmount,
+
 			CurrencyCode: offer.CurrencyCode,
 			Message:      offer.Message,
 			Status:       offer.Status,

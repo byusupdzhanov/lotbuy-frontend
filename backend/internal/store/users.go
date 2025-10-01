@@ -111,7 +111,6 @@ func (s *Store) UpdateUserProfile(ctx context.Context, params UpdateUserProfileP
 
 	updates = append(updates, "updated_at = NOW()")
 	args = append(args, params.UserID)
-
         query := fmt.Sprintf(`UPDATE users SET %s WHERE id = $%d RETURNING id, email, full_name, password_hash, role, avatar_url,
                   completed_deals, rating_total, rating_count, created_at, updated_at`,
 		strings.Join(updates, ", "), idx)

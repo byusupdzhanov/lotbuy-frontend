@@ -175,6 +175,7 @@ const decorateDeal = (detail, currentUserId) => {
 
 const DealsPage = () => {
   const { user } = useAuth();
+
   const [activeTab, setActiveTab] = useState('active');
   const [viewMode, setViewMode] = useState('list');
   const [selectedDealId, setSelectedDealId] = useState(null);
@@ -353,6 +354,7 @@ const DealsPage = () => {
       awaiting: decoratedDeals.filter((deal) => ['awaiting_payment', 'awaiting_confirmation'].includes(deal.status)).length,
       completed: decoratedDeals.filter((deal) => deal.status === 'completed').length,
       disputes: decoratedDeals.filter((deal) => deal.status === 'in_dispute').length
+      
     };
 
     return [
