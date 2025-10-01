@@ -10,6 +10,8 @@ import CreateLot from "pages/create-lot";
 import BrowseLots from "pages/browse-lots";
 import LotDetailsOffers from "pages/lot-details-offers";
 import UserProfile from "pages/user-profile";
+import Deals from "pages/deals";
+import NotFound from "pages/NotFound";
 
 const Routes = () => {
   return (
@@ -24,6 +26,8 @@ const Routes = () => {
           <Route path="/browse-lots" element={<BrowseLots />} />
           <Route path="/lot-details-offers" element={<LotDetailsOffers />} />
           <Route path="/user-profile" element={<UserProfile />} />
+          <Route path="/deals" element={<Deals />} />
+          <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>
     </BrowserRouter>
