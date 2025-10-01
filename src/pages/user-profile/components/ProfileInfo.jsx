@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Icon from 'components/AppIcon';
 import Image from 'components/AppImage';
 
+
 const ProfileInfo = ({ profile, stats, activeLots = [], saving, onSave, onUploadAvatar }) => {
+
   const [fullName, setFullName] = useState(profile?.fullName || '');
   const [error, setError] = useState(null);
 

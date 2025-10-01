@@ -31,7 +31,7 @@ const Header = () => {
       icon: 'Search',
       tooltip: 'Find lots to bid on'
     },
-    {
+        {
       label: 'Deals',
       path: '/deals',
       icon: 'Handshake',
@@ -122,6 +122,22 @@ const Header = () => {
     }
   };
 
+  const loadAuthFromStorage = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('lotbuy-auth');
+      if (!raw) {
+        setAuthUser(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setAuthUser(parsed?.user ?? null);
+    } catch (error) {
+      console.warn('Failed to parse auth payload', error);
+      setAuthUser(null);
+    }
+  };
+
   const handleProfileClick = () => {
     if (authUser) {
       navigate('/user-profile');
@@ -163,6 +179,14 @@ const Header = () => {
     setAuthUser(user ?? null);
     const count = user?.stats?.unreadNotifications ?? 0;
     setNotificationCount(count);
+  }, [user]);
+
+  const userInitials = authUser?.fullName
+    ? authUser.fullName.split(' ').map((part) => part.charAt(0)).join('').slice(0, 2).toUpperCase()
+    : null;
+
+  useEffect(() => {
+    setAuthUser(user ?? null);
   }, [user]);
 
   const userInitials = authUser?.fullName

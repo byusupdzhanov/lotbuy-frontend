@@ -30,6 +30,6 @@ func Load() (Config, error) {
 		secret = "dev-secret-change-me"
 	}
 	cfg.AuthSecret = secret
-
+  
 	return cfg, nil
 }

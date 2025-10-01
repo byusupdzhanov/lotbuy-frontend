@@ -58,7 +58,6 @@ func (a *API) handleCreateOffer(w http.ResponseWriter, r *http.Request) {
 		httputil.Error(w, http.StatusForbidden, "request owners cannot create offers on their own lot")
 		return
 	}
-
 	sellerName := user.FullName
 	if sellerName == "" {
 		sellerName = user.Email
