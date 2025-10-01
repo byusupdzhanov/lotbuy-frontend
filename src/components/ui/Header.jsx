@@ -181,10 +181,6 @@ const Header = () => {
     setNotificationCount(count);
   }, [user]);
 
-  const userInitials = authUser?.fullName
-    ? authUser.fullName.split(' ').map((part) => part.charAt(0)).join('').slice(0, 2).toUpperCase()
-    : null;
-
   useEffect(() => {
     setAuthUser(user ?? null);
   }, [user]);
