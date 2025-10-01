@@ -24,6 +24,12 @@ const Header = () => {
       tooltip: 'Find lots to bid on'
     },
     {
+      label: 'Deals',
+      path: '/deals',
+      icon: 'Handshake',
+      tooltip: 'Manage your active deals'
+    },
+    {
       label: 'Create',
       path: '/create-lot',
       icon: 'Plus',
