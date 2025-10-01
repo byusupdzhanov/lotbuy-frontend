@@ -98,6 +98,10 @@ Build the application for production:
 npm run build
 ```
 
+## 🔌 Backend API
+
+The project now includes a Go-based backend located in the [`backend/`](backend/README.md) directory. It exposes REST endpoints for managing purchase requests, offers, and deals. Refer to the backend README for setup instructions, database schema, and environment configuration before running the frontend against a live API.
+
 ## 🙏 Acknowledgments
 
 - Built with [Rocket.new](https://rocket.new)

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
 import Image from 'components/AppImage';
@@ -49,241 +49,169 @@ const statusConfig = {
   }
 };
 
+const fetchDeals = async (signal) => {
+  const response = await fetch('/api/deals', { signal });
+  if (!response.ok) {
+    let message = 'Unable to load deals';
+    try {
+      const payload = await response.clone().json();
+      if (payload?.error) {
+        message = payload.error;
+      } else if (typeof payload === 'string') {
+        message = payload;
+      }
+    } catch (jsonError) {
+      const text = await response.text();
+      if (text) {
+        message = text;
+      }
+    }
+    throw new Error(message);
+  }
+  return response.json();
+};
+
+const formatCurrency = (amount, currency) => {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD'
+    }).format(amount ?? 0);
+  } catch (error) {
+    return `${amount ?? 0} ${currency ?? ''}`.trim();
+  }
+};
+
+const formatDateTime = (value) => {
+  if (!value) return null;
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(value));
+  } catch (error) {
+    return value;
+  }
+};
+
+const formatRelative = (value) => {
+  if (!value) return 'No updates yet';
+  const target = new Date(value);
+  const now = new Date();
+  const diffMs = target.getTime() - now.getTime();
+  const diffMinutes = Math.round(diffMs / (60 * 1000));
+
+  const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  if (Math.abs(diffMinutes) < 60) {
+    return formatter.format(Math.round(diffMinutes), 'minute');
+  }
+  const diffHours = Math.round(diffMinutes / 60);
+  if (Math.abs(diffHours) < 24) {
+    return formatter.format(diffHours, 'hour');
+  }
+  const diffDays = Math.round(diffHours / 24);
+  return formatter.format(diffDays, 'day');
+};
+
+const buildActions = (status) => {
+  switch (status) {
+    case 'awaiting_payment':
+      return [
+        { id: 'pay', label: 'Send payment', primary: true },
+        { id: 'message', label: 'Message seller' }
+      ];
+    case 'awaiting_shipment':
+      return [
+        { id: 'track', label: 'Track shipment', primary: true },
+        { id: 'message', label: 'Message seller' }
+      ];
+    case 'awaiting_confirmation':
+      return [
+        { id: 'confirm', label: 'Confirm delivery', primary: true },
+        { id: 'message', label: 'Message seller' }
+      ];
+    case 'completed':
+      return [
+        { id: 'review', label: 'Leave review', primary: true },
+        { id: 'duplicate', label: 'Duplicate request' }
+      ];
+    case 'in_dispute':
+      return [
+        { id: 'respond', label: 'Respond to dispute', primary: true },
+        { id: 'view', label: 'View evidence' }
+      ];
+    default:
+      return [
+        { id: 'message', label: 'Message partner', primary: true },
+        { id: 'details', label: 'Deal details' }
+      ];
+  }
+};
+
+const mapDealFromApi = (deal) => {
+  const dueDate = formatDateTime(deal.dueAt);
+  const lastMessageTime = formatRelative(deal.lastMessageAt);
+  return {
+    id: `deal-${deal.id}`,
+    title: deal.request?.title ?? 'Untitled deal',
+    lotTitle: deal.request?.title ?? '—',
+    offerAmount: deal.totalAmount,
+    currency: deal.currencyCode ?? 'USD',
+    buyer: {
+      name: deal.buyer?.name ?? 'Unknown buyer',
+      avatar: deal.buyer?.avatarUrl ?? null,
+      rating: deal.buyer?.rating ?? 0
+    },
+    seller: {
+      name: deal.seller?.name ?? 'Unknown seller',
+      avatar: deal.seller?.avatarUrl ?? null,
+      rating: deal.seller?.rating ?? 0
+    },
+    status: deal.status ?? 'active',
+    lastMessage: {
+      text: deal.lastMessageText ?? 'No updates yet',
+      time: lastMessageTime
+    },
+    dueDate: dueDate ? `Due ${dueDate}` : 'No deadline',
+    createdAt: formatDateTime(deal.createdAt) ?? '—',
+    milestones:
+      deal.milestones?.map((milestone) => ({
+        id: `milestone-${milestone.id}`,
+        label: milestone.label,
+        timestamp: formatDateTime(milestone.completedAt),
+        completed: Boolean(milestone.completed)
+      })) ?? [],
+    actions: buildActions(deal.status)
+  };
+};
+
 const DealsPage = () => {
   const [activeTab, setActiveTab] = useState('active');
   const [viewMode, setViewMode] = useState('list');
   const [selectedDealId, setSelectedDealId] = useState(null);
+  const [deals, setDeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const deals = useMemo(
-    () => [
-      {
-        id: 'deal-001',
-        title: 'MacBook Pro M3 Max purchase',
-        lotTitle: 'Looking for MacBook Pro M3 Max 32GB',
-        offerAmount: 9800,
-        currency: 'USD',
-        buyer: {
-          name: 'Denis Ivanov',
-          avatar:
-            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop&crop=face',
-          rating: 4.9
-        },
-        seller: {
-          name: 'Elena Petrova',
-          avatar:
-            'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=80&h=80&fit=crop&crop=face',
-          rating: 4.7
-        },
-        status: 'awaiting_payment',
-        lastMessage: {
-          text: 'Payment request sent. Waiting for buyer confirmation.',
-          time: '15 minutes ago'
-        },
-        dueDate: '24 hours to pay',
-        createdAt: 'Mar 4, 2025',
-        milestones: [
-          {
-            id: 'milestone-1',
-            label: 'Offer accepted',
-            timestamp: 'Mar 3, 12:10',
-            completed: true
-          },
-          {
-            id: 'milestone-2',
-            label: 'Payment',
-            timestamp: null,
-            completed: false
-          },
-          {
-            id: 'milestone-3',
-            label: 'Shipment',
-            timestamp: null,
-            completed: false
-          },
-          {
-            id: 'milestone-4',
-            label: 'Confirmation',
-            timestamp: null,
-            completed: false
-          }
-        ],
-        actions: [
-          { id: 'pay', label: 'Send payment', primary: true },
-          { id: 'message', label: 'Message seller' }
-        ]
-      },
-      {
-        id: 'deal-002',
-        title: 'Office chairs bulk order',
-        lotTitle: 'Need 6 ergonomic office chairs',
-        offerAmount: 1320,
-        currency: 'USD',
-        buyer: {
-          name: 'Maria Gomez',
-          avatar:
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face',
-          rating: 4.8
-        },
-        seller: {
-          name: 'Workspace Supplies LLC',
-          avatar:
-            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop&crop=face',
-          rating: 4.6
-        },
-        status: 'active',
-        lastMessage: {
-          text: 'Shipment picked up by courier. Tracking number sent.',
-          time: '1 hour ago'
-        },
-        dueDate: 'Deliver by Mar 12',
-        createdAt: 'Feb 28, 2025',
-        milestones: [
-          {
-            id: 'milestone-1',
-            label: 'Offer accepted',
-            timestamp: 'Feb 28, 09:32',
-            completed: true
-          },
-          {
-            id: 'milestone-2',
-            label: 'Payment',
-            timestamp: 'Mar 1, 14:20',
-            completed: true
-          },
-          {
-            id: 'milestone-3',
-            label: 'Shipment',
-            timestamp: null,
-            completed: false
-          },
-          {
-            id: 'milestone-4',
-            label: 'Confirmation',
-            timestamp: null,
-            completed: false
-          }
-        ],
-        actions: [
-          { id: 'track', label: 'Track shipment', primary: true },
-          { id: 'message', label: 'Message seller' },
-          { id: 'extend', label: 'Extend deadline' }
-        ]
-      },
-      {
-        id: 'deal-003',
-        title: 'Photography kit purchase',
-        lotTitle: 'Canon R5 body + 24-70mm lens',
-        offerAmount: 4200,
-        currency: 'USD',
-        buyer: {
-          name: 'Alex Johnson',
-          avatar:
-            'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=80&h=80&fit=crop&crop=face',
-          rating: 4.5
-        },
-        seller: {
-          name: 'Photo Market Pro',
-          avatar:
-            'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=80&h=80&fit=crop&crop=face',
-          rating: 4.9
-        },
-        status: 'completed',
-        lastMessage: {
-          text: 'Deal completed. Leave a review for the seller?',
-          time: '2 days ago'
-        },
-        dueDate: 'Completed Mar 1',
-        createdAt: 'Feb 15, 2025',
-        milestones: [
-          {
-            id: 'milestone-1',
-            label: 'Offer accepted',
-            timestamp: 'Feb 15, 10:16',
-            completed: true
-          },
-          {
-            id: 'milestone-2',
-            label: 'Payment',
-            timestamp: 'Feb 15, 10:45',
-            completed: true
-          },
-          {
-            id: 'milestone-3',
-            label: 'Shipment',
-            timestamp: 'Feb 16, 18:20',
-            completed: true
-          },
-          {
-            id: 'milestone-4',
-            label: 'Confirmation',
-            timestamp: 'Mar 1, 12:05',
-            completed: true
-          }
-        ],
-        actions: [
-          { id: 'review', label: 'Leave review', primary: true },
-          { id: 'duplicate', label: 'Duplicate request' }
-        ]
-      },
-      {
-        id: 'deal-004',
-        title: 'Gaming PC build assistance',
-        lotTitle: 'Custom gaming PC builder',
-        offerAmount: 2600,
-        currency: 'USD',
-        buyer: {
-          name: 'Sergey Kuznetsov',
-          avatar:
-            'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=80&h=80&fit=crop&crop=face',
-          rating: 4.6
-        },
-        seller: {
-          name: 'Ultimate Gaming Builds',
-          avatar:
-            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face',
-          rating: 4.4
-        },
-        status: 'in_dispute',
-        lastMessage: {
-          text: 'Buyer filed a dispute regarding missing GPU. Support reviewing.',
-          time: '3 hours ago'
-        },
-        dueDate: 'Response required in 12h',
-        createdAt: 'Feb 20, 2025',
-        milestones: [
-          {
-            id: 'milestone-1',
-            label: 'Offer accepted',
-            timestamp: 'Feb 20, 11:12',
-            completed: true
-          },
-          {
-            id: 'milestone-2',
-            label: 'Payment',
-            timestamp: 'Feb 20, 12:05',
-            completed: true
-          },
-          {
-            id: 'milestone-3',
-            label: 'Shipment',
-            timestamp: 'Feb 24, 19:32',
-            completed: true
-          },
-          {
-            id: 'milestone-4',
-            label: 'Confirmation',
-            timestamp: null,
-            completed: false
-          }
-        ],
-        actions: [
-          { id: 'respond', label: 'Respond to dispute', primary: true },
-          { id: 'view', label: 'View evidence' }
-        ]
-      }
-    ],
-    []
-  );
+  useEffect(() => {
+    const controller = new AbortController();
+    setIsLoading(true);
+    fetchDeals(controller.signal)
+      .then((data) => {
+        const normalized = Array.isArray(data) ? data.map(mapDealFromApi) : [];
+        setDeals(normalized);
+        setError(null);
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return;
+        setError(err.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, []);
 
   const filteredDeals = useMemo(() => {
     switch (activeTab) {
@@ -331,7 +259,7 @@ const DealsPage = () => {
         label: 'Completed',
         value: summary.completed,
         icon: 'CheckCircle',
-        trend: '94% success rate'
+        trend: summary.completed > 0 ? 'Great work!' : 'No completed deals yet'
       },
       {
         id: 'disputes',
@@ -432,7 +360,25 @@ const DealsPage = () => {
           </section>
 
           <section>
-            {filteredDeals.length === 0 ? (
+            {isLoading ? (
+              <div className="card p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-6">
+                  <Icon name="Loader2" size={28} className="animate-spin text-text-secondary" />
+                </div>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Loading deals...</h2>
+                <p className="text-text-secondary max-w-md mx-auto">
+                  Fetching the latest transactions and milestones.
+                </p>
+              </div>
+            ) : error ? (
+              <div className="card p-12 text-center border border-error-200 bg-error-50">
+                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-6 text-error-600">
+                  <Icon name="AlertTriangle" size={28} />
+                </div>
+                <h2 className="text-xl font-semibold text-error-700 mb-2">Failed to load deals</h2>
+                <p className="text-error-600 max-w-md mx-auto">{error}</p>
+              </div>
+            ) : filteredDeals.length === 0 ? (
               <div className="card p-12 text-center">
                 <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-6">
                   <Icon name="Inbox" size={28} className="text-text-secondary" />
@@ -483,12 +429,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
           </div>
 
           <div className="text-right">
-            <p className="text-2xl font-semibold text-text-primary">
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: deal.currency
-              }).format(deal.offerAmount)}
-            </p>
+            <p className="text-2xl font-semibold text-text-primary">{formatCurrency(deal.offerAmount, deal.currency)}</p>
             <p className="text-sm text-text-secondary">{deal.dueDate}</p>
           </div>
         </header>
@@ -532,7 +473,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
           </div>
         </section>
 
-        {isExpanded && showMilestones && (
+        {isExpanded && showMilestones && deal.milestones.length > 0 && (
           <section className="mt-4">
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide mb-3">
               Milestones
@@ -556,9 +497,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
                       {milestone.timestamp || 'Pending'}
                     </p>
                   </div>
-                  {index < deal.milestones.length - 1 && (
-                    <div className="hidden sm:block w-px h-8 bg-border" />
-                  )}
+                  {index < deal.milestones.length - 1 && <div className="hidden sm:block w-px h-8 bg-border" />}
                 </div>
               ))}
             </div>
@@ -570,25 +509,44 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
 };
 
 const PartyCard = ({ data, label, align = 'left' }) => (
-  <div className={`border border-border rounded-lg p-4 flex items-center gap-3 ${align === 'right' ? 'justify-end text-right' : 'text-left'}`}>
-    {align !== 'right' && (
-      <Avatar image={data.avatar} name={data.name} />
-    )}
+  <div
+    className={`border border-border rounded-lg p-4 flex items-center gap-3 ${
+      align === 'right' ? 'justify-end text-right' : 'text-left'
+    }`}
+  >
+    {align !== 'right' && <Avatar image={data.avatar} name={data.name} />}
     <div>
       <p className="text-xs uppercase tracking-wide text-text-secondary font-semibold">{label}</p>
       <p className="text-sm font-medium text-text-primary">{data.name}</p>
-      <p className="text-xs text-text-secondary">Rating {data.rating.toFixed(1)} / 5</p>
+      <p className="text-xs text-text-secondary">
+        Rating
+        {typeof data.rating === 'number' ? ` ${data.rating.toFixed(1)} / 5` : ' —'}
+      </p>
     </div>
-    {align === 'right' && (
-      <Avatar image={data.avatar} name={data.name} />
-    )}
+    {align === 'right' && <Avatar image={data.avatar} name={data.name} />}
   </div>
 );
 
-const Avatar = ({ image, name }) => (
-  <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary-100 flex-shrink-0">
-    <Image src={image} alt={name} className="w-full h-full object-cover" />
-  </div>
-);
+const Avatar = ({ image, name }) => {
+  if (!image) {
+    const initials = name
+      .split(' ')
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+    return (
+      <div className="w-12 h-12 rounded-full bg-secondary-200 flex items-center justify-center text-text-primary font-semibold">
+        {initials || '?'}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary-100 flex-shrink-0">
+      <Image src={image} alt={name} className="w-full h-full object-cover" />
+    </div>
+  );
+};
 
 export default DealsPage;
