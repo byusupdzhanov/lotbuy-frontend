@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 
 const formatCurrency = (amount, currencyCode = 'USD') => {
   const value = Number(amount) || 0;
@@ -24,7 +24,7 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMes
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary-200">
-            <Image
+            <AppImage
               src={offer.sellerAvatarUrl || undefined}
               alt={offer.sellerName}
               className="w-full h-full object-cover"

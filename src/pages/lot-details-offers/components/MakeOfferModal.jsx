@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from 'components/AppIcon';
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD'];
+const CURRENCIES = ['USD', 'RUB'];
 
 const MakeOfferModal = ({ open, lot, initialValues, onClose, onSubmit }) => {
   const [price, setPrice] = useState(initialValues?.priceAmount || '');

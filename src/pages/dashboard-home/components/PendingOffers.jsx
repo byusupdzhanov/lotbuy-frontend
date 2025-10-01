@@ -1,6 +1,16 @@
 import React from 'react';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
+
+const formatCurrency = (amount, currency = 'USD') => {
+  const value = Number(amount) || 0;
+  const code = (currency || 'USD').toUpperCase();
+  try {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).format(value);
+  } catch (error) {
+    return `${code} ${value.toLocaleString()}`;
+  }
+};
 
 const formatCurrency = (amount, currency = 'USD') => {
   const value = Number(amount) || 0;
@@ -69,7 +79,7 @@ const PendingOffers = ({ offers = [], onViewOffer, onMessageSeller }) => {
 
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                  <Image
+                  <AppImage
                     src={item.offer.sellerAvatarUrl || undefined}
                     alt={item.offer.sellerName}
                     className="w-full h-full object-cover"

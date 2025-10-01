@@ -1,13 +1,32 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
+import { useAuth } from 'context/AuthContext';
 
 const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClose }) => {
   const [draft, setDraft] = useState('');
   const [attachment, setAttachment] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const { user } = useAuth();
+  const currentUserId = user?.id;
+
+  const buyerId = offer?.buyerId ?? offer?.buyerUserId ?? null;
+  const sellerId = offer?.sellerId ?? offer?.sellerUserId ?? null;
+  const buyerName = offer?.buyerName || 'Buyer';
+  const sellerName = offer?.sellerName || 'Seller';
+  const buyerAvatar = offer?.buyerAvatarUrl || null;
+  const sellerAvatar = offer?.sellerAvatarUrl || null;
+
+  const isSeller = useMemo(() => {
+    if (!currentUserId || sellerId == null) return false;
+    return sellerId === currentUserId;
+  }, [currentUserId, sellerId]);
+
+  const counterpartName = useMemo(() => (isSeller ? buyerName : sellerName), [buyerName, isSeller, sellerName]);
+
+  const counterpartAvatar = useMemo(() => (isSeller ? buyerAvatar : sellerAvatar), [buyerAvatar, isSeller, sellerAvatar]);
 
   useEffect(() => {
     if (open) {
@@ -51,7 +70,26 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
     setAttachment({ file, previewUrl, name: file.name });
   };
 
-  const recipientName = useMemo(() => offer?.sellerName || 'Seller', [offer?.sellerName]);
+  const conversationTitle = useMemo(
+    () => `Conversation with ${counterpartName}`,
+    [counterpartName]
+  );
+
+  const resolveSenderLabel = useCallback(
+    (senderId) => {
+      if (senderId === currentUserId) {
+        return 'You';
+      }
+      if (buyerId != null && senderId === buyerId) {
+        return buyerName;
+      }
+      if (sellerId != null && senderId === sellerId) {
+        return sellerName;
+      }
+      return 'Participant';
+    },
+    [buyerId, buyerName, currentUserId, sellerId, sellerName]
+  );
 
   if (!open) {
     return null;
@@ -63,14 +101,14 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-secondary-50">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full overflow-hidden bg-secondary-200">
-              <Image
-                src={offer?.sellerAvatarUrl || undefined}
-                alt={recipientName}
+              <AppImage
+                src={counterpartAvatar || undefined}
+                alt={counterpartName}
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
-              <h3 className="font-semibold text-text-primary">Conversation with {recipientName}</h3>
+              <h3 className="font-semibold text-text-primary">{conversationTitle}</h3>
               <p className="text-xs text-text-secondary">Offer submitted {new Date(offer?.createdAt).toLocaleString()}</p>
             </div>
           </div>
@@ -96,9 +134,7 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
             messages.map((message) => (
               <div key={message.id} className="space-y-2">
                 <div className="flex items-center space-x-2 text-xs text-text-secondary">
-                  <span className="font-medium text-text-primary">
-                    {message.senderUserId === offer?.sellerId ? recipientName : 'You'}
-                  </span>
+                  <span className="font-medium text-text-primary">{resolveSenderLabel(message.senderUserId)}</span>
                   <span>•</span>
                   <span>{new Date(message.createdAt).toLocaleString()}</span>
                 </div>
@@ -108,7 +144,7 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
                   </p>
                 )}
                 {message.attachmentUrl && (
-                  <Image
+                  <AppImage
                     src={message.attachmentUrl}
                     alt="Attachment"
                     className="max-w-xs rounded-lg border border-border"

@@ -1,6 +1,36 @@
 import React from 'react';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
+
+const formatCurrency = (amount, currency = 'USD') => {
+  const value = Number(amount) || 0;
+  const code = (currency || 'USD').toUpperCase();
+  try {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).format(value);
+  } catch (error) {
+    return `${code} ${value.toLocaleString()}`;
+  }
+};
+
+const formatDeadline = (deadline) => {
+  if (!deadline) return null;
+  const target = new Date(deadline);
+  const now = new Date();
+  if (Number.isNaN(target.getTime())) return null;
+  const diff = target.getTime() - now.getTime();
+  if (diff <= 0) return 'Deadline passed';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days > 0) return `${days} day${days === 1 ? '' : 's'} left`;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  if (hours > 0) return `${hours} hour${hours === 1 ? '' : 's'} left`;
+  const minutes = Math.floor(diff / (1000 * 60));
+  return `${minutes} min left`;
+};
+
+const buildLocation = (lot) => {
+  const segments = [lot.locationCity, lot.locationRegion, lot.locationCountry].filter(Boolean);
+  return segments.join(', ');
+};
 
 const formatCurrency = (amount, currency = 'USD') => {
   const value = Number(amount) || 0;
@@ -77,7 +107,7 @@ const ActiveLots = ({ lots = [], onViewLot }) => {
             >
               <div className="flex items-start space-x-4">
                 <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-secondary-100">
-                  <Image
+                  <AppImage
                     src={lot.imageUrl || undefined}
                     alt={lot.title}
                     className="w-full h-full object-cover"

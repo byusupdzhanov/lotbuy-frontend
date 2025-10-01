@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop';
 
@@ -58,7 +58,7 @@ const LotCard = ({ lot, canMakeOffer = true }) => {
     >
       <div className="relative">
         <div className="aspect-video bg-secondary-100">
-          <Image src={displayImage} alt={lot.title} className="w-full h-full object-cover" />
+          <AppImage src={displayImage} alt={lot.title} className="w-full h-full object-cover" />
         </div>
         {createdLabel && (
           <span className="absolute top-3 left-3 px-2 py-1 rounded-full text-xs bg-black/70 text-white">
@@ -90,7 +90,7 @@ const LotCard = ({ lot, canMakeOffer = true }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full overflow-hidden bg-secondary-200">
-              <Image
+              <AppImage
                 src={lot.buyerAvatarUrl || undefined}
                 alt={lot.buyerName || 'Buyer'}
                 className="w-full h-full object-cover"

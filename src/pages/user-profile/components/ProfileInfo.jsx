@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 
 const ProfileInfo = ({ profile, stats, activeLots = [], saving, onSave, onUploadAvatar }) => {
   const [fullName, setFullName] = useState(profile?.fullName || '');
@@ -46,7 +46,7 @@ const ProfileInfo = ({ profile, stats, activeLots = [], saving, onSave, onUpload
 
       <div className="flex items-center space-x-4">
         <div className="w-24 h-24 rounded-full overflow-hidden bg-secondary-100">
-          <Image
+          <AppImage
             src={profile?.avatarUrl || undefined}
             alt={profile?.fullName || 'User avatar'}
             className="w-full h-full object-cover"

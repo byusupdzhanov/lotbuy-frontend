@@ -60,6 +60,7 @@ func (a *API) handleCreateRequest(w http.ResponseWriter, r *http.Request) {
 	if buyerName == "" {
 		buyerName = user.Email
 	}
+
 	var deadline *time.Time
 	if payload.DeadlineAt != nil {
 		trimmed := strings.TrimSpace(*payload.DeadlineAt)

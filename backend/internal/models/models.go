@@ -63,17 +63,23 @@ type OfferMessage struct {
 }
 
 type Deal struct {
-	ID              int64      `db:"id" json:"id"`
-	RequestID       int64      `db:"request_id" json:"requestId"`
-	OfferID         int64      `db:"offer_id" json:"offerId"`
-	Status          string     `db:"status" json:"status"`
-	TotalAmount     float64    `db:"total_amount" json:"totalAmount"`
-	CurrencyCode    string     `db:"currency_code" json:"currencyCode"`
-	DueAt           *time.Time `db:"due_at" json:"dueAt,omitempty"`
-	LastMessageText *string    `db:"last_message_text" json:"lastMessageText,omitempty"`
-	LastMessageAt   *time.Time `db:"last_message_at" json:"lastMessageAt,omitempty"`
-	CreatedAt       time.Time  `db:"created_at" json:"createdAt"`
-	UpdatedAt       time.Time  `db:"updated_at" json:"updatedAt"`
+        ID              int64      `db:"id" json:"id"`
+        RequestID       int64      `db:"request_id" json:"requestId"`
+        OfferID         int64      `db:"offer_id" json:"offerId"`
+        Status          string     `db:"status" json:"status"`
+        TotalAmount     float64    `db:"total_amount" json:"totalAmount"`
+        CurrencyCode    string     `db:"currency_code" json:"currencyCode"`
+        DueAt           *time.Time `db:"due_at" json:"dueAt,omitempty"`
+        LastMessageText *string    `db:"last_message_text" json:"lastMessageText,omitempty"`
+        LastMessageAt   *time.Time `db:"last_message_at" json:"lastMessageAt,omitempty"`
+        DisputeReason   *string    `db:"dispute_reason" json:"disputeReason,omitempty"`
+        DisputeOpenedBy *int64     `db:"dispute_opened_by" json:"disputeOpenedBy,omitempty"`
+        DisputeOpenedAt *time.Time `db:"dispute_opened_at" json:"disputeOpenedAt,omitempty"`
+        CompletedAt     *time.Time `db:"completed_at" json:"completedAt,omitempty"`
+        BuyerRating     *int       `db:"buyer_rating" json:"buyerRating,omitempty"`
+        SellerRating    *int       `db:"seller_rating" json:"sellerRating,omitempty"`
+        CreatedAt       time.Time  `db:"created_at" json:"createdAt"`
+        UpdatedAt       time.Time  `db:"updated_at" json:"updatedAt"`
 }
 
 type DealMilestone struct {
@@ -88,12 +94,14 @@ type DealMilestone struct {
 }
 
 type DealDetails struct {
-	Deal
-	Request    Request          `json:"request"`
-	Seller     OfferParticipant `json:"seller"`
-	Buyer      BuyerParticipant `json:"buyer"`
-	Offer      OfferSummary     `json:"offer"`
-	Milestones []DealMilestone  `json:"milestones"`
+        Deal
+        Request    Request          `json:"request"`
+        Seller     OfferParticipant `json:"seller"`
+        Buyer      BuyerParticipant `json:"buyer"`
+        Offer      OfferSummary     `json:"offer"`
+        Milestones []DealMilestone  `json:"milestones"`
+        BuyerUserID *int64          `json:"buyerUserId,omitempty"`
+        SellerUserID *int64         `json:"sellerUserId,omitempty"`
 }
 
 type OfferParticipant struct {
@@ -117,30 +125,42 @@ type OfferSummary struct {
 }
 
 type User struct {
-	ID           int64     `db:"id" json:"id"`
-	Email        string    `db:"email" json:"email"`
-	FullName     string    `db:"full_name" json:"fullName"`
-	PasswordHash string    `db:"password_hash" json:"-"`
-	Role         string    `db:"role" json:"role"`
-	AvatarURL    *string   `db:"avatar_url" json:"avatarUrl,omitempty"`
-	CreatedAt    time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt    time.Time `db:"updated_at" json:"updatedAt"`
+        ID           int64     `db:"id" json:"id"`
+        Email        string    `db:"email" json:"email"`
+        FullName     string    `db:"full_name" json:"fullName"`
+        PasswordHash string    `db:"password_hash" json:"-"`
+        Role         string    `db:"role" json:"role"`
+        AvatarURL    *string   `db:"avatar_url" json:"avatarUrl,omitempty"`
+        CompletedDeals int     `db:"completed_deals" json:"completedDeals"`
+        RatingTotal    int     `db:"rating_total" json:"-"`
+        RatingCount    int     `db:"rating_count" json:"-"`
+        CreatedAt    time.Time `db:"created_at" json:"createdAt"`
+        UpdatedAt    time.Time `db:"updated_at" json:"updatedAt"`
 }
 
 type PublicUser struct {
-	ID        int64   `json:"id"`
-	Email     string  `json:"email"`
-	FullName  string  `json:"fullName"`
-	Role      string  `json:"role"`
-	AvatarURL *string `json:"avatarUrl,omitempty"`
+        ID        int64   `json:"id"`
+        Email     string  `json:"email"`
+        FullName  string  `json:"fullName"`
+        Role      string  `json:"role"`
+        AvatarURL *string `json:"avatarUrl,omitempty"`
+        CompletedDeals int    `json:"completedDeals"`
+        Rating          *float64 `json:"rating,omitempty"`
 }
 
 func (u User) Public() PublicUser {
-	return PublicUser{
-		ID:        u.ID,
-		Email:     u.Email,
-		FullName:  u.FullName,
-		Role:      u.Role,
-		AvatarURL: u.AvatarURL,
-	}
+        var rating *float64
+        if u.RatingCount > 0 {
+                value := float64(u.RatingTotal) / float64(u.RatingCount)
+                rating = &value
+        }
+        return PublicUser{
+                ID:        u.ID,
+                Email:     u.Email,
+                FullName:  u.FullName,
+                Role:      u.Role,
+                AvatarURL: u.AvatarURL,
+                CompletedDeals: u.CompletedDeals,
+                Rating:         rating,
+        }
 }

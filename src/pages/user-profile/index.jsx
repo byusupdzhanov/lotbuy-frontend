@@ -191,7 +191,7 @@ const UserProfile = () => {
               <div className="bg-surface border border-border rounded-xl p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-primary-100">
-                    <Image
+                    <AppImage
                       src={profile.avatarUrl || undefined}
                       alt={profile.fullName}
                       className="w-full h-full object-cover"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 
 const ImageCarousel = ({ images = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -51,7 +51,7 @@ const ImageCarousel = ({ images = [] }) => {
     <div className="relative w-full h-64 lg:h-96 bg-secondary-100 rounded-lg overflow-hidden group">
       {/* Main Image */}
       <div className="relative w-full h-full">
-        <Image
+        <AppImage
           src={images[currentIndex]}
           alt={`Lot image ${currentIndex + 1}`}
           className="w-full h-full object-cover"

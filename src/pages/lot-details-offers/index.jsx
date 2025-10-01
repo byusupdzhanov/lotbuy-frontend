@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 import { useAuth } from 'context/AuthContext';
 import { APIError } from 'lib/api/client';
 import { getRequest } from 'lib/api/requests';
@@ -203,7 +203,22 @@ const LotDetailsOffers = () => {
 
   const handleOpenChat = async (offer) => {
     if (!offer) return;
-    setChatOffer(offer);
+    const buyerId = request?.buyerId ?? request?.buyerUserId ?? null;
+    const viewerIsBuyer = buyerId != null && buyerId === user?.id;
+    const buyerName = request?.buyerName || (viewerIsBuyer ? user?.fullName : null) || 'Buyer';
+    const buyerAvatarUrl =
+      request?.buyerAvatarUrl || (viewerIsBuyer ? user?.avatarUrl ?? null : null);
+    const sellerName = offer?.sellerName || (!viewerIsBuyer ? user?.fullName : null) || 'Seller';
+    const sellerAvatarUrl = offer?.sellerAvatarUrl || (!viewerIsBuyer ? user?.avatarUrl ?? null : null);
+
+    setChatOffer({
+      ...offer,
+      buyerId,
+      buyerName,
+      buyerAvatarUrl,
+      sellerName,
+      sellerAvatarUrl,
+    });
     setChatOpen(true);
     await loadChatMessages(offer.id);
   };
@@ -291,7 +306,7 @@ const LotDetailsOffers = () => {
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-surface border border-border rounded-xl overflow-hidden">
                   <div className="aspect-video bg-secondary-100">
-                    <Image
+                    <AppImage
                       src={request.imageUrl || 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=1200&auto=format&fit=crop'}
                       alt={request.title}
                       className="w-full h-full object-cover"
@@ -349,7 +364,7 @@ const LotDetailsOffers = () => {
                 <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary-200">
-                      <Image
+                      <AppImage
                         src={request.buyerAvatarUrl || undefined}
                         alt={request.buyerName || 'Buyer'}
                         className="w-full h-full object-cover"

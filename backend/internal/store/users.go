@@ -27,7 +27,8 @@ func (s *Store) CreateUser(ctx context.Context, params CreateUserParams) (*model
 	query := `
         INSERT INTO users (email, full_name, password_hash, role, avatar_url)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, email, full_name, password_hash, role, avatar_url, created_at, updated_at
+        RETURNING id, email, full_name, password_hash, role, avatar_url,
+                  completed_deals, rating_total, rating_count, created_at, updated_at
     `
 
 	var user models.User
@@ -44,7 +45,9 @@ func (s *Store) CreateUser(ctx context.Context, params CreateUserParams) (*model
 }
 
 func (s *Store) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	query := `SELECT id, email, full_name, password_hash, role, avatar_url, created_at, updated_at FROM users WHERE email = $1`
+        query := `SELECT id, email, full_name, password_hash, role, avatar_url,
+                     completed_deals, rating_total, rating_count, created_at, updated_at
+              FROM users WHERE email = $1`
 
 	var user models.User
 	if err := s.db.GetContext(ctx, &user, query, strings.ToLower(email)); err != nil {
@@ -57,7 +60,9 @@ func (s *Store) GetUserByEmail(ctx context.Context, email string) (*models.User,
 }
 
 func (s *Store) GetUserByID(ctx context.Context, id int64) (*models.User, error) {
-	query := `SELECT id, email, full_name, password_hash, role, avatar_url, created_at, updated_at FROM users WHERE id = $1`
+        query := `SELECT id, email, full_name, password_hash, role, avatar_url,
+                     completed_deals, rating_total, rating_count, created_at, updated_at
+              FROM users WHERE id = $1`
 
 	var user models.User
 	if err := s.db.GetContext(ctx, &user, query, id); err != nil {
@@ -106,8 +111,8 @@ func (s *Store) UpdateUserProfile(ctx context.Context, params UpdateUserProfileP
 
 	updates = append(updates, "updated_at = NOW()")
 	args = append(args, params.UserID)
-
-	query := fmt.Sprintf(`UPDATE users SET %s WHERE id = $%d RETURNING id, email, full_name, password_hash, role, avatar_url, created_at, updated_at`,
+        query := fmt.Sprintf(`UPDATE users SET %s WHERE id = $%d RETURNING id, email, full_name, password_hash, role, avatar_url,
+                  completed_deals, rating_total, rating_count, created_at, updated_at`,
 		strings.Join(updates, ", "), idx)
 
 	var user models.User

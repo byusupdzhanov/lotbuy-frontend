@@ -1,7 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
+import { useAuth } from 'context/AuthContext';
+import {
+  listDeals,
+  markDealShipped,
+  submitDealPayment,
+  confirmDealCompletion,
+  openDealDispute,
+  rateDealCounterparty,
+} from 'lib/api/deals';
+import { APIError } from 'lib/api/client';
 
 const DEAL_TABS = [
   { id: 'all', label: 'All deals' },
@@ -49,28 +59,6 @@ const statusConfig = {
   }
 };
 
-const fetchDeals = async (signal) => {
-  const response = await fetch('/api/deals', { signal });
-  if (!response.ok) {
-    let message = 'Unable to load deals';
-    try {
-      const payload = await response.clone().json();
-      if (payload?.error) {
-        message = payload.error;
-      } else if (typeof payload === 'string') {
-        message = payload;
-      }
-    } catch (jsonError) {
-      const text = await response.text();
-      if (text) {
-        message = text;
-      }
-    }
-    throw new Error(message);
-  }
-  return response.json();
-};
-
 const formatCurrency = (amount, currency) => {
   try {
     return new Intl.NumberFormat('en-US', {
@@ -113,130 +101,260 @@ const formatRelative = (value) => {
   return formatter.format(diffDays, 'day');
 };
 
-const buildActions = (status) => {
-  switch (status) {
-    case 'awaiting_payment':
-      return [
-        { id: 'pay', label: 'Send payment', primary: true },
-        { id: 'message', label: 'Message seller' }
-      ];
-    case 'awaiting_shipment':
-      return [
-        { id: 'track', label: 'Track shipment', primary: true },
-        { id: 'message', label: 'Message seller' }
-      ];
-    case 'awaiting_confirmation':
-      return [
-        { id: 'confirm', label: 'Confirm delivery', primary: true },
-        { id: 'message', label: 'Message seller' }
-      ];
-    case 'completed':
-      return [
-        { id: 'review', label: 'Leave review', primary: true },
-        { id: 'duplicate', label: 'Duplicate request' }
-      ];
-    case 'in_dispute':
-      return [
-        { id: 'respond', label: 'Respond to dispute', primary: true },
-        { id: 'view', label: 'View evidence' }
-      ];
-    default:
-      return [
-        { id: 'message', label: 'Message partner', primary: true },
-        { id: 'details', label: 'Deal details' }
-      ];
-  }
-};
+const decorateDeal = (detail, currentUserId) => {
+  if (!detail) return null;
+  const dueDate = formatDateTime(detail.dueAt);
+  const isBuyer = detail.buyerUserId != null && detail.buyerUserId === currentUserId;
+  const isSeller = detail.sellerUserId != null && detail.sellerUserId === currentUserId;
 
-const mapDealFromApi = (deal) => {
-  const dueDate = formatDateTime(deal.dueAt);
-  const lastMessageTime = formatRelative(deal.lastMessageAt);
-  return {
-    id: `deal-${deal.id}`,
-    title: deal.request?.title ?? 'Untitled deal',
-    lotTitle: deal.request?.title ?? '—',
-    offerAmount: deal.totalAmount,
-    currency: deal.currencyCode ?? 'USD',
-    buyer: {
-      name: deal.buyer?.name ?? 'Unknown buyer',
-      avatar: deal.buyer?.avatarUrl ?? null,
-      rating: deal.buyer?.rating ?? 0
-    },
-    seller: {
-      name: deal.seller?.name ?? 'Unknown seller',
-      avatar: deal.seller?.avatarUrl ?? null,
-      rating: deal.seller?.rating ?? 0
-    },
-    status: deal.status ?? 'active',
-    lastMessage: {
-      text: deal.lastMessageText ?? 'No updates yet',
-      time: lastMessageTime
-    },
-    dueDate: dueDate ? `Due ${dueDate}` : 'No deadline',
-    createdAt: formatDateTime(deal.createdAt) ?? '—',
-    milestones:
-      deal.milestones?.map((milestone) => ({
-        id: `milestone-${milestone.id}`,
+  const buyer = {
+    name: detail.buyer?.name ?? 'Buyer',
+    avatar: detail.buyer?.avatarUrl ?? null,
+    rating: detail.buyer?.rating ?? null,
+  };
+  const seller = {
+    name: detail.seller?.name ?? 'Seller',
+    avatar: detail.seller?.avatarUrl ?? null,
+    rating: detail.seller?.rating ?? null,
+  };
+
+  const actions = [];
+  if (isSeller && detail.status === 'awaiting_shipment') {
+    actions.push({ id: 'mark_shipped', label: 'Confirm shipment', primary: true });
+  }
+  if (isBuyer && detail.status === 'awaiting_payment') {
+    actions.push({ id: 'submit_payment', label: 'Pay now', primary: true });
+  }
+  if (isSeller && detail.status === 'awaiting_confirmation') {
+    actions.push({ id: 'confirm_delivery', label: 'Confirm payment', primary: true });
+  }
+  if (detail.status === 'completed') {
+    if (isBuyer && detail.sellerRating == null) {
+      actions.push({ id: 'rate_seller', label: 'Rate seller', primary: true, meta: { target: 'seller' } });
+    }
+    if (isSeller && detail.buyerRating == null) {
+      actions.push({ id: 'rate_buyer', label: 'Rate buyer', primary: false, meta: { target: 'buyer' } });
+    }
+  }
+  if ((isBuyer || isSeller) && !['completed', 'in_dispute'].includes(detail.status)) {
+    actions.push({ id: 'open_dispute', label: 'Open dispute', primary: false });
+  }
+
+  const milestones = Array.isArray(detail.milestones)
+    ? detail.milestones.map((milestone) => ({
+        id: milestone.id,
         label: milestone.label,
         timestamp: formatDateTime(milestone.completedAt),
-        completed: Boolean(milestone.completed)
-      })) ?? [],
-    actions: buildActions(deal.status)
+        completed: Boolean(milestone.completed),
+      }))
+    : [];
+
+  return {
+    id: detail.id,
+    detail,
+    title: detail.request?.title ?? 'Untitled deal',
+    lotTitle: detail.request?.title ?? '—',
+    offerAmount: detail.totalAmount ?? detail.offer?.priceAmount ?? 0,
+    currency: detail.currencyCode ?? detail.offer?.currencyCode ?? 'USD',
+    buyer,
+    seller,
+    status: detail.status ?? 'active',
+    lastMessage: {
+      text: detail.lastMessageText ?? 'No updates yet',
+      time: formatRelative(detail.lastMessageAt),
+    },
+    dueDate: dueDate ? `Due ${dueDate}` : 'No deadline',
+    createdAt: formatDateTime(detail.createdAt) ?? '—',
+    milestones,
+    actions,
+    isBuyer,
+    isSeller,
+    disputeReason: detail.disputeReason,
   };
 };
 
 const DealsPage = () => {
+  const { user } = useAuth();
+
   const [activeTab, setActiveTab] = useState('active');
   const [viewMode, setViewMode] = useState('list');
   const [selectedDealId, setSelectedDealId] = useState(null);
   const [deals, setDeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [banner, setBanner] = useState(null);
+  const [dialog, setDialog] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const loadDeals = useCallback(async () => {
+    if (!user?.id) {
+      setDeals([]);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const data = await listDeals();
+      setDeals(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch (err) {
+      const message = err instanceof APIError ? err.message : 'Unable to load deals.';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    setIsLoading(true);
-    fetchDeals(controller.signal)
-      .then((data) => {
-        const normalized = Array.isArray(data) ? data.map(mapDealFromApi) : [];
-        setDeals(normalized);
-        setError(null);
-      })
-      .catch((err) => {
-        if (err.name === 'AbortError') return;
-        setError(err.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    loadDeals();
+  }, [loadDeals]);
 
-    return () => controller.abort();
+  const updateDealState = useCallback((updated) => {
+    if (!updated) return;
+    setDeals((prev) => {
+      const next = [...prev];
+      const index = next.findIndex((deal) => deal.id === updated.id);
+      if (index >= 0) {
+        next[index] = updated;
+        return next;
+      }
+      return [...next, updated];
+    });
   }, []);
+
+  const showBanner = useCallback((type, message) => {
+    setBanner({ type, message });
+  }, []);
+
+  useEffect(() => {
+    if (!banner) return undefined;
+    const timer = setTimeout(() => setBanner(null), 6000);
+    return () => clearTimeout(timer);
+  }, [banner]);
+
+  const performDealUpdate = useCallback(
+    async (operation, successMessage) => {
+      setSubmitting(true);
+      try {
+        const updated = await operation();
+        updateDealState(updated);
+        if (successMessage) {
+          showBanner('success', successMessage);
+        }
+      } catch (err) {
+        const message = err instanceof APIError ? err.message : 'Failed to update deal.';
+        showBanner('error', message);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [showBanner, updateDealState]
+  );
+
+  const handleAction = useCallback(
+    (deal, action) => {
+      if (!deal?.detail || !action || submitting) {
+        return;
+      }
+      switch (action.id) {
+        case 'mark_shipped': {
+          if (window.confirm('Confirm that the goods have been shipped to the buyer?')) {
+            performDealUpdate(() => markDealShipped(deal.detail.id), 'Shipment confirmed.');
+          }
+          break;
+        }
+        case 'submit_payment':
+          setDialog({ type: 'payment', deal });
+          break;
+        case 'confirm_delivery':
+          setDialog({ type: 'confirm', deal });
+          break;
+        case 'open_dispute':
+          setDialog({ type: 'dispute', deal });
+          break;
+        case 'rate_seller':
+        case 'rate_buyer':
+          setDialog({ type: 'rate', deal, target: action.meta?.target });
+          break;
+        default:
+          break;
+      }
+    },
+    [performDealUpdate, submitting]
+  );
+
+  const handleSubmitPayment = useCallback(async () => {
+    if (!dialog?.deal?.detail) return;
+    await performDealUpdate(
+      () => submitDealPayment(dialog.deal.detail.id),
+      'Payment submitted. Awaiting seller confirmation.'
+    );
+    setDialog(null);
+  }, [dialog, performDealUpdate]);
+
+  const handleConfirmCompletion = useCallback(async () => {
+    if (!dialog?.deal?.detail) return;
+    await performDealUpdate(
+      () => confirmDealCompletion(dialog.deal.detail.id),
+      'Deal marked as completed.'
+    );
+    setDialog(null);
+  }, [dialog, performDealUpdate]);
+
+  const handleOpenDispute = useCallback(
+    async (reason) => {
+      if (!dialog?.deal?.detail) return;
+      await performDealUpdate(
+        () => openDealDispute(dialog.deal.detail.id, reason),
+        'Dispute created. Our team will review it shortly.'
+      );
+      setDialog(null);
+    },
+    [dialog, performDealUpdate]
+  );
+
+  const handleSubmitRating = useCallback(
+    async (rating, comment) => {
+      if (!dialog?.deal?.detail) return;
+      await performDealUpdate(
+        () => rateDealCounterparty(dialog.deal.detail.id, rating, comment),
+        'Feedback submitted.'
+      );
+      setDialog(null);
+    },
+    [dialog, performDealUpdate]
+  );
+
+  const decoratedDeals = useMemo(
+    () => deals.map((item) => decorateDeal(item, user?.id)).filter(Boolean),
+    [deals, user?.id]
+  );
 
   const filteredDeals = useMemo(() => {
     switch (activeTab) {
       case 'all':
-        return deals;
+        return decoratedDeals;
       case 'active':
-        return deals.filter((deal) => ['active', 'awaiting_shipment'].includes(deal.status));
+        return decoratedDeals.filter((deal) => ['active', 'awaiting_shipment'].includes(deal.status));
       case 'awaiting':
-        return deals.filter((deal) => ['awaiting_payment', 'awaiting_confirmation'].includes(deal.status));
+        return decoratedDeals.filter((deal) => ['awaiting_payment', 'awaiting_confirmation'].includes(deal.status));
       case 'completed':
-        return deals.filter((deal) => deal.status === 'completed');
+        return decoratedDeals.filter((deal) => deal.status === 'completed');
       case 'disputes':
-        return deals.filter((deal) => deal.status === 'in_dispute');
+        return decoratedDeals.filter((deal) => deal.status === 'in_dispute');
       default:
-        return deals;
+        return decoratedDeals;
     }
-  }, [activeTab, deals]);
+  }, [activeTab, decoratedDeals]);
 
   const stats = useMemo(() => {
     const summary = {
-      total: deals.length,
-      active: deals.filter((deal) => ['active', 'awaiting_shipment'].includes(deal.status)).length,
-      awaiting: deals.filter((deal) => ['awaiting_payment', 'awaiting_confirmation'].includes(deal.status)).length,
-      completed: deals.filter((deal) => deal.status === 'completed').length,
-      disputes: deals.filter((deal) => deal.status === 'in_dispute').length
+      total: decoratedDeals.length,
+      active: decoratedDeals.filter((deal) => ['active', 'awaiting_shipment'].includes(deal.status)).length,
+      awaiting: decoratedDeals.filter((deal) => ['awaiting_payment', 'awaiting_confirmation'].includes(deal.status)).length,
+      completed: decoratedDeals.filter((deal) => deal.status === 'completed').length,
+      disputes: decoratedDeals.filter((deal) => deal.status === 'in_dispute').length
+      
     };
 
     return [
@@ -297,6 +415,28 @@ const DealsPage = () => {
               </button>
             </div>
           </header>
+
+          {banner && (
+            <div
+              className={`flex items-start justify-between gap-4 p-4 rounded-lg border ${
+                banner.type === 'success'
+                  ? 'bg-success-50 border-success-200 text-success-700'
+                  : 'bg-error-50 border-error-200 text-error-700'
+              }`}
+            >
+              <div className="flex items-start gap-2">
+                <Icon name={banner.type === 'success' ? 'CheckCircle' : 'AlertTriangle'} size={18} />
+                <p className="text-sm leading-5">{banner.message}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBanner(null)}
+                className="text-xs font-medium uppercase tracking-wide"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
 
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((item) => (
@@ -399,6 +539,8 @@ const DealsPage = () => {
                       setSelectedDealId((current) => (current === deal.id ? null : deal.id))
                     }
                     showMilestones={viewMode === 'list'}
+                    onAction={handleAction}
+                    actionDisabled={submitting}
                   />
                 ))}
               </div>
@@ -406,11 +548,41 @@ const DealsPage = () => {
           </section>
         </div>
       </main>
+
+      <PaymentDialog
+        open={dialog?.type === 'payment'}
+        deal={dialog?.deal}
+        submitting={submitting}
+        onClose={() => setDialog(null)}
+        onSubmit={handleSubmitPayment}
+      />
+      <ConfirmDialog
+        open={dialog?.type === 'confirm'}
+        deal={dialog?.deal}
+        submitting={submitting}
+        onClose={() => setDialog(null)}
+        onConfirm={handleConfirmCompletion}
+      />
+      <DisputeDialog
+        open={dialog?.type === 'dispute'}
+        deal={dialog?.deal}
+        submitting={submitting}
+        onClose={() => setDialog(null)}
+        onSubmit={handleOpenDispute}
+      />
+      <RatingDialog
+        open={dialog?.type === 'rate'}
+        deal={dialog?.deal}
+        target={dialog?.target}
+        submitting={submitting}
+        onClose={() => setDialog(null)}
+        onSubmit={handleSubmitRating}
+      />
     </div>
   );
 };
 
-const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
+const DealCard = ({ deal, onToggle, isExpanded, showMilestones, onAction, actionDisabled }) => {
   const status = statusConfig[deal.status] ?? statusConfig.active;
 
   return (
@@ -459,6 +631,8 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
                     ? 'btn-primary px-4 py-2 rounded-lg'
                     : 'btn-secondary px-3 py-2 rounded-lg'
                 } text-sm font-medium`}
+                onClick={() => onAction?.(deal, action)}
+                disabled={actionDisabled}
               >
                 {action.label}
               </button>
@@ -503,8 +677,258 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones }) => {
             </div>
           </section>
         )}
+        {deal.status === 'in_dispute' && deal.disputeReason && (
+          <section className="mt-4 p-4 border border-error-200 bg-error-50 rounded-lg">
+            <p className="text-sm font-semibold text-error-700">Dispute</p>
+            <p className="text-sm text-error-600 mt-1">{deal.disputeReason}</p>
+          </section>
+        )}
       </div>
     </article>
+  );
+};
+
+const ModalContainer = ({ open, title, onClose, children }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+      <div className="w-full max-w-lg bg-surface rounded-xl shadow-lg overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-secondary-50">
+          <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 text-text-secondary hover:text-text-primary"
+          >
+            <Icon name="X" size={18} />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+const PaymentDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
+  const [form, setForm] = useState({
+    name: '',
+    number: '',
+    expiry: '',
+    cvv: '',
+  });
+
+  useEffect(() => {
+    if (open) {
+      setForm({ name: deal?.buyer?.name ?? '', number: '', expiry: '', cvv: '' });
+    }
+  }, [open, deal?.detail?.id, deal?.buyer?.name]);
+
+  const handleChange = (key) => (event) => {
+    setForm((prev) => ({ ...prev, [key]: event.target.value }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSubmit?.();
+  };
+
+  return (
+    <ModalContainer open={open} title="Mock payment" onClose={onClose}>
+      <p className="text-sm text-text-secondary">
+        Payments are simulated in this environment. Provide any card details to mark the invoice as paid.
+      </p>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Name on card</label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={handleChange('name')}
+            className="input-field"
+            placeholder="John Doe"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Card number</label>
+          <input
+            type="text"
+            value={form.number}
+            onChange={handleChange('number')}
+            className="input-field"
+            placeholder="0000 0000 0000 0000"
+            required
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Expiry</label>
+            <input
+              type="text"
+              value={form.expiry}
+              onChange={handleChange('expiry')}
+              className="input-field"
+              placeholder="MM/YY"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary uppercase mb-2">CVV</label>
+            <input
+              type="password"
+              value={form.cvv}
+              onChange={handleChange('cvv')}
+              className="input-field"
+              placeholder="***"
+              required
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn-primary px-4 py-2 rounded-lg text-sm"
+            disabled={submitting}
+          >
+            {submitting ? 'Processing...' : 'Submit payment'}
+          </button>
+        </div>
+      </form>
+    </ModalContainer>
+  );
+};
+
+const ConfirmDialog = ({ open, deal, submitting, onClose, onConfirm }) => (
+  <ModalContainer open={open} title="Confirm payment received" onClose={onClose}>
+    <p className="text-sm text-text-secondary">
+      Confirm that you have delivered the goods and received payment from {deal?.buyer?.name ?? 'the buyer'}.
+      You can leave feedback after completion.
+    </p>
+    <div className="flex justify-end gap-3 pt-2">
+      <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
+        Cancel
+      </button>
+      <button
+        type="button"
+        onClick={onConfirm}
+        className="btn-primary px-4 py-2 rounded-lg text-sm"
+        disabled={submitting}
+      >
+        {submitting ? 'Confirming...' : 'Mark as completed'}
+      </button>
+    </div>
+  </ModalContainer>
+);
+
+const DisputeDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
+  const [reason, setReason] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setReason('');
+    }
+  }, [open, deal?.detail?.id]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSubmit?.(reason.trim() || 'Dispute opened');
+  };
+
+  return (
+    <ModalContainer open={open} title="Open dispute" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <p className="text-sm text-text-secondary">
+          Describe what went wrong. Our team will review the dispute and reach out to both parties.
+        </p>
+        <textarea
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          className="input-field min-h-[120px]"
+          placeholder="Explain the issue"
+          required
+        />
+        <div className="flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn-primary px-4 py-2 rounded-lg text-sm"
+            disabled={submitting}
+          >
+            {submitting ? 'Submitting...' : 'Create dispute'}
+          </button>
+        </div>
+      </form>
+    </ModalContainer>
+  );
+};
+
+const RatingDialog = ({ open, deal, target = 'seller', submitting, onClose, onSubmit }) => {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setRating(5);
+      setComment('');
+    }
+  }, [open, deal?.detail?.id, target]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSubmit?.(rating, comment.trim());
+  };
+
+  const title = target === 'buyer' ? 'Rate buyer' : 'Rate seller';
+  const label = target === 'buyer' ? deal?.buyer?.name ?? 'buyer' : deal?.seller?.name ?? 'seller';
+
+  return (
+    <ModalContainer open={open} title={title} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <p className="text-sm text-text-secondary">
+          Share feedback about {label}. Ratings help build trust on the marketplace.
+        </p>
+        <div>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Rating</label>
+          <select
+            value={rating}
+            onChange={(event) => setRating(Number(event.target.value))}
+            className="input-field"
+          >
+            {[5, 4, 3, 2, 1].map((value) => (
+              <option key={value} value={value}>
+                {value} / 5
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Comment (optional)</label>
+          <textarea
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+            className="input-field min-h-[100px]"
+            placeholder="Add helpful context for future trades"
+          />
+        </div>
+        <div className="flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn-primary px-4 py-2 rounded-lg text-sm"
+            disabled={submitting}
+          >
+            {submitting ? 'Submitting...' : 'Submit rating'}
+          </button>
+        </div>
+      </form>
+    </ModalContainer>
   );
 };
 
@@ -544,7 +968,7 @@ const Avatar = ({ image, name }) => {
 
   return (
     <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary-100 flex-shrink-0">
-      <Image src={image} alt={name} className="w-full h-full object-cover" />
+      <AppImage src={image} alt={name} className="w-full h-full object-cover" />
     </div>
   );
 };

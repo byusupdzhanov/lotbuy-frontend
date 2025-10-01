@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 import { useAuth } from 'context/AuthContext';
 import { APIError } from 'lib/api/client';
 import { createRequest, deleteRequest, getRequest, updateRequest } from 'lib/api/requests';
@@ -570,7 +570,7 @@ const CreateLot = () => {
                     onChange={(e) => handleInputChange('currency', e.target.value.toUpperCase())}
                     className="input-field w-32"
                   >
-                    {['USD', 'EUR', 'GBP', 'AUD', 'CAD'].map((option) => (
+                    {['USD', 'RUB'].map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -723,7 +723,7 @@ const CreateLot = () => {
                   {formData.images.map((image) => (
                     <div key={image.id} className="relative group">
                       <div className="aspect-square rounded-lg overflow-hidden bg-secondary-100 relative">
-                        <Image
+                        <AppImage
                           src={image.url}
                           alt={image.name}
                           className="w-full h-full object-cover"
@@ -921,7 +921,7 @@ const CreateLot = () => {
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {formData.images.slice(0, 3).map((image) => (
                   <div key={image.id} className="aspect-square rounded overflow-hidden bg-secondary-100">
-                    <Image
+                    <AppImage
                       src={image.url}
                       alt={image.name}
                       className="w-full h-full object-cover"
@@ -930,7 +930,7 @@ const CreateLot = () => {
                 ))}
                 {primaryImageUrl && formData.images.length === 0 && (
                   <div className="aspect-square rounded overflow-hidden bg-secondary-100">
-                    <Image
+                    <AppImage
                       src={primaryImageUrl}
                       alt="Primary lot image"
                       className="w-full h-full object-cover"

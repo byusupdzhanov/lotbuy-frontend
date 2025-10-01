@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
-import Image from 'components/AppImage';
+import AppImage from 'components/AppImage';
 import RecentActivity from './components/RecentActivity';
 import QuickStats from './components/QuickStats';
 import ActiveLots from './components/ActiveLots';
@@ -75,10 +75,15 @@ const DashboardHome = () => {
 
   const profileSummary = useMemo(() => {
     if (!currentUser) return null;
+    const ratingSource = typeof currentUser.rating === 'number' ? currentUser.rating : null;
+    const derivedRating = stats?.completedDeals
+      ? Math.min(5, 4 + stats.completedDeals / 50)
+      : null;
+    const ratingValue = ratingSource != null ? ratingSource : derivedRating;
     return {
       avatar: currentUser.avatarUrl,
-      rating: stats?.completedDeals ? Math.min(5, 4 + stats.completedDeals / 50).toFixed(1) : null,
-      deals: stats?.completedDeals ?? 0,
+      rating: ratingValue != null ? ratingValue.toFixed(1) : '—',
+      deals: currentUser.completedDeals ?? stats?.completedDeals ?? 0,
     };
   }, [currentUser, stats]);
 
@@ -142,7 +147,7 @@ const DashboardHome = () => {
                   onClick={() => handleQuickAction('view_profile')}
                   className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-200 hover:border-primary-500 transition-colors duration-200"
                 >
-                  <Image
+                  <AppImage
                     src={profileSummary?.avatar}
                     alt={currentUser?.fullName}
                     className="w-full h-full object-cover"
