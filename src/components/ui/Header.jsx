@@ -183,7 +183,7 @@ const Header = () => {
                 <Icon name="Gavel" size={20} color="white" />
               </div>
               <span className="text-xl font-semibold text-text-primary hidden sm:block">
-                AuctionHub
+                Lotbuy
               </span>
             </button>
           </div>

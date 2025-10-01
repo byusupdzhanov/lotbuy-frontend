@@ -164,7 +164,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               {mode === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-              {mode === 'login' ?'Sign in to your AuctionHub account' :'Join the AuctionHub marketplace'
+              {mode === 'login' ?'Sign in to your Lotbuy account' :'Join the Lotbuy marketplace'
               }
             </p>
           </div>
