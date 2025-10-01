@@ -32,35 +32,6 @@ const buildLocation = (lot) => {
   return segments.join(', ');
 };
 
-const formatCurrency = (amount, currency = 'USD') => {
-  const value = Number(amount) || 0;
-  const code = (currency || 'USD').toUpperCase();
-  try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).format(value);
-  } catch (error) {
-    return `${code} ${value.toLocaleString()}`;
-  }
-};
-
-const formatDeadline = (deadline) => {
-  if (!deadline) return null;
-  const target = new Date(deadline);
-  const now = new Date();
-  if (Number.isNaN(target.getTime())) return null;
-  const diff = target.getTime() - now.getTime();
-  if (diff <= 0) return 'Deadline passed';
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days > 0) return `${days} day${days === 1 ? '' : 's'} left`;
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  if (hours > 0) return `${hours} hour${hours === 1 ? '' : 's'} left`;
-  const minutes = Math.floor(diff / (1000 * 60));
-  return `${minutes} min left`;
-};
-
-const buildLocation = (lot) => {
-  const segments = [lot.locationCity, lot.locationRegion, lot.locationCountry].filter(Boolean);
-  return segments.join(', ');
-};
 
 const ActiveLots = ({ lots = [], onViewLot }) => {
   const handleViewLot = (lotId) => {

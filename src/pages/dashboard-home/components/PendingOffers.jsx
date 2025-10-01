@@ -12,16 +12,6 @@ const formatCurrency = (amount, currency = 'USD') => {
   }
 };
 
-const formatCurrency = (amount, currency = 'USD') => {
-  const value = Number(amount) || 0;
-  const code = (currency || 'USD').toUpperCase();
-  try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).format(value);
-  } catch (error) {
-    return `${code} ${value.toLocaleString()}`;
-  }
-};
-
 const PendingOffers = ({ offers = [], onViewOffer, onMessageSeller }) => {
   const handleViewOffer = (offer) => {
     if (onViewOffer) {

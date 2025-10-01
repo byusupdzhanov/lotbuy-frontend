@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
+import AppImage from 'components/AppImage';
 import ProfileInfo from './components/ProfileInfo';
 import Settings from './components/Settings';
 import TransactionHistory from './components/TransactionHistory';
