@@ -26,6 +26,12 @@ const Header = () => {
       icon: 'Search',
       tooltip: 'Find lots to bid on'
     },
+        {
+      label: 'Deals',
+      path: '/deals',
+      icon: 'Handshake',
+      tooltip: 'Manage your active deals'
+    },
     {
       label: 'Deals',
       path: '/deals',
@@ -70,6 +76,22 @@ const Header = () => {
     console.log('Notifications clicked');
   };
 
+  const loadAuthFromStorage = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('lotbuy-auth');
+      if (!raw) {
+        setAuthUser(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setAuthUser(parsed?.user ?? null);
+    } catch (error) {
+      console.warn('Failed to parse auth payload', error);
+      setAuthUser(null);
+    }
+  };
+
   const handleProfileClick = () => {
     if (authUser) {
       navigate('/user-profile');
@@ -82,6 +104,14 @@ const Header = () => {
     if (authUser) {
       logout?.();
       navigate('/login-register');
+    } else {
+      navigate('/login-register');
+    }
+  };
+
+  const handleAuthClick = () => {
+    if (authUser) {
+      handleLogout();
     } else {
       navigate('/login-register');
     }
