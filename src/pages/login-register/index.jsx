@@ -4,10 +4,12 @@ import Icon from 'components/AppIcon';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import SocialAuth from './components/SocialAuth';
+import { useAuth } from 'context/AuthContext';
 
 const LoginRegister = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, login, initializing } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,6 +22,12 @@ const LoginRegister = () => {
     }
   }, [location.search]);
 
+  useEffect(() => {
+    if (!initializing && user) {
+      navigate('/dashboard-home', { replace: true });
+    }
+  }, [initializing, user, navigate]);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     // Update URL without causing navigation
@@ -27,9 +35,10 @@ const LoginRegister = () => {
     window.history.replaceState({}, '', newUrl);
   };
 
-  const handleAuthSuccess = (userData) => {
-    console.log('Authentication successful:', userData);
-    // In real app, you would store auth token and user data
+  const handleAuthSuccess = (authPayload) => {
+    if (authPayload) {
+      login(authPayload);
+    }
     navigate('/dashboard-home');
   };
 
