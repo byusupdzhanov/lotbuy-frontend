@@ -26,7 +26,6 @@ func NewAPI(s *store.Store, tokens *auth.TokenManager) *API {
 func (a *API) RegisterRoutes(r *server.Router) {
 	r.Handle(http.MethodGet, "/api/health", a.handleHealth)
 
-
 	r.Handle(http.MethodPost, "/api/auth/register", a.handleRegister)
 	r.Handle(http.MethodPost, "/api/auth/login", a.handleLogin)
 	r.Handle(http.MethodGet, "/api/requests", a.handleListRequests)
@@ -60,7 +59,6 @@ func decodeJSON(r *http.Request, dest interface{}) error {
 	decoder.DisallowUnknownFields()
 	return decoder.Decode(dest)
 }
-
 
 type registerRequest struct {
 	FirstName string `json:"firstName"`

@@ -4,10 +4,12 @@ import Icon from 'components/AppIcon';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import SocialAuth from './components/SocialAuth';
+import { useAuth } from 'context/AuthContext';
 
 const LoginRegister = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, login, initializing } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,16 +23,10 @@ const LoginRegister = () => {
   }, [location.search]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem('lotbuy-auth');
-      if (raw) {
-        navigate('/dashboard-home', { replace: true });
-      }
-    } catch (error) {
-      console.warn('Unable to check auth status', error);
+    if (!initializing && user) {
+      navigate('/dashboard-home', { replace: true });
     }
-  }, [navigate]);
+  }, [initializing, user, navigate]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -40,12 +36,8 @@ const LoginRegister = () => {
   };
 
   const handleAuthSuccess = (authPayload) => {
-    if (authPayload && typeof window !== 'undefined') {
-      try {
-        window.localStorage.setItem('lotbuy-auth', JSON.stringify(authPayload));
-      } catch (error) {
-        console.warn('Unable to persist auth payload', error);
-      }
+    if (authPayload) {
+      login(authPayload);
     }
     navigate('/dashboard-home');
   };

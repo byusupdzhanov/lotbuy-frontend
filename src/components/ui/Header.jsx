@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../AppIcon';
+import { useAuth } from 'context/AuthContext';
 
 const Header = () => {
   const location = useLocation();
@@ -9,6 +10,7 @@ const Header = () => {
   const [notificationCount, setNotificationCount] = useState(3);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { user, logout } = useAuth();
   const [authUser, setAuthUser] = useState(null);
 
   const navigationItems = [
@@ -25,6 +27,12 @@ const Header = () => {
       tooltip: 'Find lots to bid on'
     },
         {
+      label: 'Deals',
+      path: '/deals',
+      icon: 'Handshake',
+      tooltip: 'Manage your active deals'
+    },
+    {
       label: 'Deals',
       path: '/deals',
       icon: 'Handshake',
@@ -92,14 +100,13 @@ const Header = () => {
     }
   };
 
-  const handleLogout = () => {
-    try {
-      window.localStorage.removeItem('lotbuy-auth');
-    } catch (error) {
-      console.warn('Unable to clear auth payload', error);
+  const handleAuthClick = () => {
+    if (authUser) {
+      logout?.();
+      navigate('/login-register');
+    } else {
+      navigate('/login-register');
     }
-    setAuthUser(null);
-    navigate('/login-register');
   };
 
   const handleAuthClick = () => {
@@ -128,18 +135,8 @@ const Header = () => {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
-    loadAuthFromStorage();
-    if (typeof window === 'undefined') return undefined;
-
-    const handleStorage = (event) => {
-      if (event.key === 'lotbuy-auth') {
-        loadAuthFromStorage();
-      }
-    };
-
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+    setAuthUser(user ?? null);
+  }, [user]);
 
   const userInitials = authUser?.fullName
     ? authUser.fullName.split(' ').map((part) => part.charAt(0)).join('').slice(0, 2).toUpperCase()
@@ -237,21 +234,30 @@ const Header = () => {
 
             {/* Profile/Auth */}
             {authUser ? (
-              <button
-                onClick={handleProfileClick}
-                className="w-10 h-10 rounded-full bg-primary-100 text-primary font-semibold flex items-center justify-center hover:bg-primary-200 transition-all duration-200"
-                title="View profile"
-              >
-                {authUser.avatarUrl ? (
-                  <img
-                    src={authUser.avatarUrl}
-                    alt={authUser.fullName}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <span>{userInitials ?? 'U'}</span>
-                )}
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleAuthClick}
+                  className="p-2 text-text-secondary hover:text-error-600 hover:bg-error-50 rounded-lg transition-all duration-200"
+                  title="Sign out"
+                >
+                  <Icon name="LogOut" size={20} />
+                </button>
+                <button
+                  onClick={handleProfileClick}
+                  className="w-10 h-10 rounded-full bg-primary-100 text-primary font-semibold flex items-center justify-center hover:bg-primary-200 transition-all duration-200"
+                  title="View profile"
+                >
+                  {authUser.avatarUrl ? (
+                    <img
+                      src={authUser.avatarUrl}
+                      alt={authUser.fullName}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span>{userInitials ?? 'U'}</span>
+                  )}
+                </button>
+              </div>
             ) : (
               <button
                 onClick={handleAuthClick}

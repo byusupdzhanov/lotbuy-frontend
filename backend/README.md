@@ -25,7 +25,6 @@ The server expects the following variables:
 | `LOTBUY_HTTP_ADDR` | Address/port to bind the API server | `:8080` |
 | `LOTBUY_AUTH_SECRET` | HMAC secret for signing auth tokens | `dev-secret-change-me` |
 
-
 ### Database schema
 
 Apply the migrations in the `migrations/` folder before running the server. A simple example with the `psql` CLI:

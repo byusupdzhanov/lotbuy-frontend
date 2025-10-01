@@ -9,7 +9,6 @@ type Config struct {
 	HTTPAddr    string
 	DatabaseURL string
 	AuthSecret  string
-
 }
 
 func Load() (Config, error) {
