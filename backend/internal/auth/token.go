@@ -70,3 +70,12 @@ func Parse(token string, secret string) (userID int64, expires time.Time, ok boo
 
 	return id, time.Unix(exp, 0), true
 }
+// Parse validates the provided token using the manager's secret and returns the
+// embedded user identifier and expiration timestamp. The boolean return value
+// is false when the token is invalid or cannot be decoded.
+func (t *TokenManager) Parse(token string) (int64, time.Time, bool) {
+	if t == nil {
+		return 0, time.Time{}, false
+	}
+	return Parse(token, string(t.secret))
+}

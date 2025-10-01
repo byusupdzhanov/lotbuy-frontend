@@ -33,12 +33,6 @@ const Header = () => {
       tooltip: 'Manage your active deals'
     },
     {
-      label: 'Deals',
-      path: '/deals',
-      icon: 'Handshake',
-      tooltip: 'Manage your active deals'
-    },
-    {
       label: 'Create',
       path: '/create-lot',
       icon: 'Plus',
@@ -104,14 +98,6 @@ const Header = () => {
     if (authUser) {
       logout?.();
       navigate('/login-register');
-    } else {
-      navigate('/login-register');
-    }
-  };
-
-  const handleAuthClick = () => {
-    if (authUser) {
-      handleLogout();
     } else {
       navigate('/login-register');
     }

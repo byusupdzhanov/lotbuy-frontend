@@ -9,14 +9,11 @@ import (
 )
 
 type createRequestPayload struct {
-	Title        string   `json:"title"`
-	Description  *string  `json:"description"`
-	BudgetAmount float64  `json:"budgetAmount"`
-	CurrencyCode string   `json:"currencyCode"`
-	BuyerName    string   `json:"buyerName"`
-	BuyerAvatar  *string  `json:"buyerAvatarUrl"`
-	BuyerRating  *float64 `json:"buyerRating"`
-	ImageURL     *string  `json:"imageUrl"`
+	Title        string  `json:"title"`
+	Description  *string `json:"description"`
+	BudgetAmount float64 `json:"budgetAmount"`
+	CurrencyCode string  `json:"currencyCode"`
+	ImageURL     *string `json:"imageUrl"`
 }
 
 func (p createRequestPayload) validate() error {
@@ -29,13 +26,15 @@ func (p createRequestPayload) validate() error {
 	if p.BudgetAmount <= 0 {
 		return errors.New("budgetAmount must be greater than zero")
 	}
-	if p.BuyerName == "" {
-		return errors.New("buyerName is required")
-	}
 	return nil
 }
 
 func (a *API) handleCreateRequest(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.requireAuth(w, r)
+	if !ok {
+		return
+	}
+
 	var payload createRequestPayload
 	if err := decodeJSON(r, &payload); err != nil {
 		httputil.Error(w, http.StatusBadRequest, err.Error())
@@ -46,14 +45,19 @@ func (a *API) handleCreateRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	buyerName := user.FullName
+	if buyerName == "" {
+		buyerName = user.Email
+	}
+
 	req, err := a.Store.CreateRequest(r.Context(), store.CreateRequestParams{
 		Title:        payload.Title,
 		Description:  payload.Description,
 		BudgetAmount: payload.BudgetAmount,
 		CurrencyCode: payload.CurrencyCode,
-		BuyerName:    payload.BuyerName,
-		BuyerAvatar:  payload.BuyerAvatar,
-		BuyerRating:  payload.BuyerRating,
+		BuyerName:    buyerName,
+		BuyerAvatar:  user.AvatarURL,
+		BuyerRating:  nil,
 		ImageURL:     payload.ImageURL,
 	})
 	if err != nil {

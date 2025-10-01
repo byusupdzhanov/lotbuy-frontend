@@ -9,18 +9,12 @@ import (
 )
 
 type createOfferPayload struct {
-	SellerName   string   `json:"sellerName"`
-	SellerAvatar *string  `json:"sellerAvatarUrl"`
-	SellerRating *float64 `json:"sellerRating"`
-	PriceAmount  float64  `json:"priceAmount"`
-	CurrencyCode string   `json:"currencyCode"`
-	Message      *string  `json:"message"`
+	PriceAmount  float64 `json:"priceAmount"`
+	CurrencyCode string  `json:"currencyCode"`
+	Message      *string `json:"message"`
 }
 
 func (p createOfferPayload) validate() error {
-	if p.SellerName == "" {
-		return errors.New("sellerName is required")
-	}
 	if p.CurrencyCode == "" {
 		return errors.New("currencyCode is required")
 	}
@@ -31,6 +25,11 @@ func (p createOfferPayload) validate() error {
 }
 
 func (a *API) handleCreateOffer(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.requireAuth(w, r)
+	if !ok {
+		return
+	}
+
 	requestID, err := parseID(r, "requestID")
 	if err != nil {
 		httputil.Error(w, http.StatusBadRequest, err.Error())
@@ -47,11 +46,16 @@ func (a *API) handleCreateOffer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sellerName := user.FullName
+	if sellerName == "" {
+		sellerName = user.Email
+	}
+
 	offer, err := a.Store.CreateOffer(r.Context(), store.CreateOfferParams{
 		RequestID:    requestID,
-		SellerName:   payload.SellerName,
-		SellerAvatar: payload.SellerAvatar,
-		SellerRating: payload.SellerRating,
+		SellerName:   sellerName,
+		SellerAvatar: user.AvatarURL,
+		SellerRating: nil,
 		PriceAmount:  payload.PriceAmount,
 		CurrencyCode: payload.CurrencyCode,
 		Message:      payload.Message,
