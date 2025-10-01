@@ -31,18 +31,6 @@ const Header = () => {
       tooltip: 'Manage your active deals'
     },
     {
-      label: 'Deals',
-      path: '/deals',
-      icon: 'Handshake',
-      tooltip: 'Manage your active deals'
-    },
-    {
-      label: 'Deals',
-      path: '/deals',
-      icon: 'Handshake',
-      tooltip: 'Manage your active deals'
-    },
-    {
       label: 'Create',
       path: '/create-lot',
       icon: 'Plus',
