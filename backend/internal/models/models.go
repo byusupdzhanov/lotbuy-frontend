@@ -84,3 +84,33 @@ type OfferSummary struct {
 	Message      *string `json:"message,omitempty"`
 	Status       string  `json:"status"`
 }
+
+type User struct {
+	ID           int64     `db:"id" json:"id"`
+	Email        string    `db:"email" json:"email"`
+	FullName     string    `db:"full_name" json:"fullName"`
+	PasswordHash string    `db:"password_hash" json:"-"`
+	Role         string    `db:"role" json:"role"`
+	AvatarURL    *string   `db:"avatar_url" json:"avatarUrl,omitempty"`
+	CreatedAt    time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt    time.Time `db:"updated_at" json:"updatedAt"`
+}
+
+type PublicUser struct {
+	ID        int64   `json:"id"`
+	Email     string  `json:"email"`
+	FullName  string  `json:"fullName"`
+	Role      string  `json:"role"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+}
+
+func (u User) Public() PublicUser {
+	return PublicUser{
+		ID:        u.ID,
+		Email:     u.Email,
+		FullName:  u.FullName,
+		Role:      u.Role,
+		AvatarURL: u.AvatarURL,
+	}
+}
+

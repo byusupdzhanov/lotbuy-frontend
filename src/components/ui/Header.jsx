@@ -9,6 +9,7 @@ const Header = () => {
   const [notificationCount, setNotificationCount] = useState(3);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [authUser, setAuthUser] = useState(null);
 
   const navigationItems = [
     {
@@ -24,6 +25,12 @@ const Header = () => {
       tooltip: 'Find lots to bid on'
     },
         {
+      label: 'Deals',
+      path: '/deals',
+      icon: 'Handshake',
+      tooltip: 'Manage your active deals'
+    },
+    {
       label: 'Deals',
       path: '/deals',
       icon: 'Handshake',
@@ -73,12 +80,46 @@ const Header = () => {
     console.log('Notifications clicked');
   };
 
+  const loadAuthFromStorage = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('lotbuy-auth');
+      if (!raw) {
+        setAuthUser(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setAuthUser(parsed?.user ?? null);
+    } catch (error) {
+      console.warn('Failed to parse auth payload', error);
+      setAuthUser(null);
+    }
+  };
+
   const handleProfileClick = () => {
-    navigate('/user-profile');
+    if (authUser) {
+      navigate('/user-profile');
+    } else {
+      navigate('/login-register');
+    }
+  };
+
+  const handleLogout = () => {
+    try {
+      window.localStorage.removeItem('lotbuy-auth');
+    } catch (error) {
+      console.warn('Unable to clear auth payload', error);
+    }
+    setAuthUser(null);
+    navigate('/login-register');
   };
 
   const handleAuthClick = () => {
-    navigate('/login-register');
+    if (authUser) {
+      handleLogout();
+    } else {
+      navigate('/login-register');
+    }
   };
 
   // Close mobile menu on route change
@@ -97,6 +138,24 @@ const Header = () => {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    loadAuthFromStorage();
+    if (typeof window === 'undefined') return undefined;
+
+    const handleStorage = (event) => {
+      if (event.key === 'lotbuy-auth') {
+        loadAuthFromStorage();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const userInitials = authUser?.fullName
+    ? authUser.fullName.split(' ').map((part) => part.charAt(0)).join('').slice(0, 2).toUpperCase()
+    : null;
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-surface border-b border-border z-100">
@@ -189,12 +248,30 @@ const Header = () => {
             </button>
 
             {/* Profile/Auth */}
-            <button
-              onClick={handleProfileClick}
-              className="p-2 text-text-secondary hover:text-text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200"
-            >
-              <Icon name="User" size={20} />
-            </button>
+            {authUser ? (
+              <button
+                onClick={handleProfileClick}
+                className="w-10 h-10 rounded-full bg-primary-100 text-primary font-semibold flex items-center justify-center hover:bg-primary-200 transition-all duration-200"
+                title="View profile"
+              >
+                {authUser.avatarUrl ? (
+                  <img
+                    src={authUser.avatarUrl}
+                    alt={authUser.fullName}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span>{userInitials ?? 'U'}</span>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={handleAuthClick}
+                className="p-2 text-text-secondary hover:text-text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200"
+              >
+                <Icon name="LogIn" size={20} />
+              </button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -249,8 +326,8 @@ const Header = () => {
               onClick={handleAuthClick}
               className="w-full flex items-center space-x-3 px-3 py-3 text-text-secondary hover:text-text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200 mt-2 border-t border-border pt-4"
             >
-              <Icon name="LogIn" size={20} />
-              <span className="font-medium">Sign In</span>
+              <Icon name={authUser ? 'LogOut' : 'LogIn'} size={20} />
+              <span className="font-medium">{authUser ? 'Sign Out' : 'Sign In'}</span>
             </button>
           </div>
         </div>

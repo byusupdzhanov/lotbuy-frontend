@@ -10,7 +10,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-
+  
+	"lotbuy-backend/internal/auth"
 	"lotbuy-backend/internal/config"
 	"lotbuy-backend/internal/handlers"
 	"lotbuy-backend/internal/server"
@@ -36,6 +37,8 @@ func main() {
 	}
 
 	store := store.New(db)
+	tokens := auth.NewTokenManager(cfg.AuthSecret, 24*time.Hour)
+	api := handlers.NewAPI(store, tokens)
 	api := handlers.NewAPI(store)
 	router := server.NewRouter()
 	api.RegisterRoutes(router)

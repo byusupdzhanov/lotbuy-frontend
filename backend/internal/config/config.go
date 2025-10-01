@@ -8,6 +8,8 @@ import (
 type Config struct {
 	HTTPAddr    string
 	DatabaseURL string
+	AuthSecret  string
+
 }
 
 func Load() (Config, error) {
@@ -24,5 +26,10 @@ func Load() (Config, error) {
 		return cfg, fmt.Errorf("LOTBUY_DATABASE_URL is not set")
 	}
 
+	secret := os.Getenv("LOTBUY_AUTH_SECRET")
+	if secret == "" {
+		secret = "dev-secret-change-me"
+	}
+	cfg.AuthSecret = secret
 	return cfg, nil
 }

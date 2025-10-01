@@ -34,11 +34,20 @@ const SocialAuth = ({ onSuccess }) => {
         email: `user@${provider.id}.com`,
         name: `${provider.name} User`,
         role: 'buyer',
-        avatar: `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 50) + 1}.jpg`,
+        avatarUrl: `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 50) + 1}.jpg`,
         provider: provider.id
       };
-      
-      onSuccess(userData);
+
+      onSuccess({
+        token: `${provider.id}-demo-token`,
+        user: {
+          id: userData.id,
+          email: userData.email,
+          fullName: userData.name,
+          role: userData.role,
+          avatarUrl: userData.avatarUrl
+        }
+      });
       
     } catch (error) {
       console.error(`${provider.name} authentication error:`, error);

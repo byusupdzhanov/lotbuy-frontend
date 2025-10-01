@@ -20,6 +20,18 @@ const LoginRegister = () => {
     }
   }, [location.search]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('lotbuy-auth');
+      if (raw) {
+        navigate('/dashboard-home', { replace: true });
+      }
+    } catch (error) {
+      console.warn('Unable to check auth status', error);
+    }
+  }, [navigate]);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     // Update URL without causing navigation
@@ -27,9 +39,14 @@ const LoginRegister = () => {
     window.history.replaceState({}, '', newUrl);
   };
 
-  const handleAuthSuccess = (userData) => {
-    console.log('Authentication successful:', userData);
-    // In real app, you would store auth token and user data
+  const handleAuthSuccess = (authPayload) => {
+    if (authPayload && typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem('lotbuy-auth', JSON.stringify(authPayload));
+      } catch (error) {
+        console.warn('Unable to persist auth payload', error);
+      }
+    }
     navigate('/dashboard-home');
   };
 
