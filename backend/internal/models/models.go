@@ -1,25 +1,36 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Request struct {
-	ID           int64     `db:"id" json:"id"`
-	Title        string    `db:"title" json:"title"`
-	Description  *string   `db:"description" json:"description,omitempty"`
-	BudgetAmount float64   `db:"budget_amount" json:"budgetAmount"`
-	CurrencyCode string    `db:"currency_code" json:"currencyCode"`
-	BuyerName    string    `db:"buyer_name" json:"buyerName"`
-	BuyerAvatar  *string   `db:"buyer_avatar_url" json:"buyerAvatarUrl,omitempty"`
-	BuyerRating  *float64  `db:"buyer_rating" json:"buyerRating,omitempty"`
-	ImageURL     *string   `db:"image_url" json:"imageUrl,omitempty"`
-	Status       string    `db:"status" json:"status"`
-	CreatedAt    time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt    time.Time `db:"updated_at" json:"updatedAt"`
+	ID              int64      `db:"id" json:"id"`
+	Title           string     `db:"title" json:"title"`
+	Description     *string    `db:"description" json:"description,omitempty"`
+	BudgetAmount    float64    `db:"budget_amount" json:"budgetAmount"`
+	CurrencyCode    string     `db:"currency_code" json:"currencyCode"`
+	BuyerID         *int64     `db:"buyer_user_id" json:"buyerId,omitempty"`
+	BuyerName       string     `db:"buyer_name" json:"buyerName"`
+	BuyerAvatar     *string    `db:"buyer_avatar_url" json:"buyerAvatarUrl,omitempty"`
+	BuyerRating     *float64   `db:"buyer_rating" json:"buyerRating,omitempty"`
+	ImageURL        *string    `db:"image_url" json:"imageUrl,omitempty"`
+	Category        *string    `db:"category" json:"category,omitempty"`
+	Subcategory     *string    `db:"subcategory" json:"subcategory,omitempty"`
+	LocationCity    *string    `db:"location_city" json:"locationCity,omitempty"`
+	LocationRegion  *string    `db:"location_region" json:"locationRegion,omitempty"`
+	LocationCountry *string    `db:"location_country" json:"locationCountry,omitempty"`
+	DeadlineAt      *time.Time `db:"deadline_at" json:"deadlineAt,omitempty"`
+	Status          string     `db:"status" json:"status"`
+	CreatedAt       time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt       time.Time  `db:"updated_at" json:"updatedAt"`
 }
 
 type Offer struct {
 	ID           int64     `db:"id" json:"id"`
 	RequestID    int64     `db:"request_id" json:"requestId"`
+	SellerID     *int64    `db:"seller_user_id" json:"sellerId,omitempty"`
 	SellerName   string    `db:"seller_name" json:"sellerName"`
 	SellerAvatar *string   `db:"seller_avatar_url" json:"sellerAvatarUrl,omitempty"`
 	SellerRating *float64  `db:"seller_rating" json:"sellerRating,omitempty"`
@@ -29,6 +40,26 @@ type Offer struct {
 	Status       string    `db:"status" json:"status"`
 	CreatedAt    time.Time `db:"created_at" json:"createdAt"`
 	UpdatedAt    time.Time `db:"updated_at" json:"updatedAt"`
+}
+
+type Notification struct {
+	ID        int64           `db:"id" json:"id"`
+	UserID    int64           `db:"user_id" json:"userId"`
+	Type      string          `db:"type" json:"type"`
+	Title     string          `db:"title" json:"title"`
+	Body      *string         `db:"body" json:"body,omitempty"`
+	Metadata  json.RawMessage `db:"metadata" json:"metadata,omitempty"`
+	IsRead    bool            `db:"is_read" json:"isRead"`
+	CreatedAt time.Time       `db:"created_at" json:"createdAt"`
+}
+
+type OfferMessage struct {
+	ID           int64     `db:"id" json:"id"`
+	OfferID      int64     `db:"offer_id" json:"offerId"`
+	SenderUserID int64     `db:"sender_user_id" json:"senderUserId"`
+	Body         *string   `db:"body" json:"body,omitempty"`
+	Attachment   *string   `db:"attachment_url" json:"attachmentUrl,omitempty"`
+	CreatedAt    time.Time `db:"created_at" json:"createdAt"`
 }
 
 type Deal struct {

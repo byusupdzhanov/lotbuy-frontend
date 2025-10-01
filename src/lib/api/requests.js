@@ -5,6 +5,12 @@ export async function listRequests(params = {}) {
   if (params.status) {
     query.set('status', params.status);
   }
+  if (params.owner) {
+    query.set('owner', params.owner);
+  }
+  if (typeof params.limit === 'number') {
+    query.set('limit', String(params.limit));
+  }
   const search = query.toString();
   return apiFetch(`/api/requests${search ? `?${search}` : ''}`);
 }

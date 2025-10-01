@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../AppIcon';
 import { useAuth } from 'context/AuthContext';
+import { listNotifications, markNotificationRead } from 'lib/api/notifications';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { user, logout } = useAuth();
   const [authUser, setAuthUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const notificationsRef = useRef(null);
 
   const navigationItems = [
     {
@@ -65,9 +70,56 @@ const Header = () => {
     }
   };
 
+  const fetchNotifications = async () => {
+    setLoadingNotifications(true);
+    try {
+      const data = await listNotifications({ limit: 8 });
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setNotifications([]);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
   const handleNotificationClick = () => {
-    // Handle notification dropdown or navigation
-    console.log('Notifications clicked');
+    setNotificationsOpen((prev) => {
+      const next = !prev;
+      if (!prev) {
+        fetchNotifications();
+      }
+      return next;
+    });
+  };
+
+  const handleNotificationSelect = async (notification) => {
+    if (!notification) return;
+    if (!notification.isRead) {
+      try {
+        await markNotificationRead(notification.id);
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === notification.id ? { ...item, isRead: true } : item
+          )
+        );
+        setNotificationCount((prev) => Math.max(prev - 1, 0));
+      } catch (error) {
+        // ignore mark read errors
+      }
+    }
+    if (notification.metadata?.offerId) {
+      navigate(`/lot-details-offers?id=${notification.metadata.requestId}`);
+      setNotificationsOpen(false);
+    }
+  };
+
+  const formatNotificationTime = (timestamp) => {
+    if (!timestamp) return '';
+    try {
+      return new Date(timestamp).toLocaleString();
+    } catch (error) {
+      return '';
+    }
   };
 
   const loadAuthFromStorage = () => {
@@ -114,11 +166,24 @@ const Header = () => {
       if (isMobileMenuOpen && !event.target.closest('.mobile-menu-container')) {
         setIsMobileMenuOpen(false);
       }
+      if (notificationsOpen && notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setNotificationsOpen(false);
+      }
     };
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, notificationsOpen]);
+
+  useEffect(() => {
+    setAuthUser(user ?? null);
+    const count = user?.stats?.unreadNotifications ?? 0;
+    setNotificationCount(count);
+  }, [user]);
+
+  const userInitials = authUser?.fullName
+    ? authUser.fullName.split(' ').map((part) => part.charAt(0)).join('').slice(0, 2).toUpperCase()
+    : null;
 
   useEffect(() => {
     setAuthUser(user ?? null);
@@ -206,17 +271,57 @@ const Header = () => {
             </button>
 
             {/* Notifications */}
-            <button
-              onClick={handleNotificationClick}
-              className="relative p-2 text-text-secondary hover:text-text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200"
-            >
-              <Icon name="Bell" size={20} />
-              {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 notification-badge min-w-[18px] h-[18px] flex items-center justify-center text-xs">
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </span>
+            <div className="relative" ref={notificationsRef}>
+              <button
+                onClick={handleNotificationClick}
+                className={`relative p-2 rounded-lg transition-all duration-200 ${
+                  notificationsOpen
+                    ? 'text-primary bg-primary-50'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-secondary-100'
+                }`}
+              >
+                <Icon name="Bell" size={20} />
+                {notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 notification-badge min-w-[18px] h-[18px] flex items-center justify-center text-xs">
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </span>
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-xl shadow-xl overflow-hidden z-100">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                    <span className="font-semibold text-sm text-text-primary">Notifications</span>
+                    {notificationCount > 0 && (
+                      <span className="text-xs text-text-secondary">{notificationCount} unread</span>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {loadingNotifications ? (
+                      <div className="py-6 text-center text-text-secondary text-sm">Loading...</div>
+                    ) : notifications.length === 0 ? (
+                      <div className="py-6 text-center text-text-secondary text-sm">No notifications yet</div>
+                    ) : (
+                      notifications.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleNotificationSelect(item)}
+                          className={`w-full text-left px-4 py-3 flex flex-col space-y-1 transition-colors duration-200 ${
+                            item.isRead ? 'bg-surface hover:bg-secondary-50' : 'bg-primary-50/40 hover:bg-primary-50'
+                          }`}
+                        >
+                          <span className="text-sm font-medium text-text-primary line-clamp-1">{item.title}</span>
+                          {item.body && (
+                            <span className="text-xs text-text-secondary line-clamp-2">{item.body}</span>
+                          )}
+                          <span className="text-[11px] text-text-tertiary">{formatNotificationTime(item.createdAt)}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
 
             {/* Profile/Auth */}
             {authUser ? (

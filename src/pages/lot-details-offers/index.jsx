@@ -9,6 +9,9 @@ import { getRequest } from 'lib/api/requests';
 import { acceptOffer, createOffer, deleteOffer, listOffers, updateOffer } from 'lib/api/offers';
 import MakeOfferModal from './components/MakeOfferModal';
 import OffersList from './components/OffersList';
+import ChatModal from './components/ChatModal';
+import { listOfferMessages, sendOfferMessage } from 'lib/api/messages';
+import { uploadImage as uploadImageFile } from 'lib/api/uploads';
 
 const formatCurrency = (amount, currency) => {
   const value = Number(amount) || 0;
@@ -21,6 +24,13 @@ const formatCurrency = (amount, currency) => {
   } catch (error) {
     return `${code} ${value.toLocaleString()}`;
   }
+};
+
+const formatLocation = (request) => {
+  if (!request) return null;
+  const parts = [request.locationCity, request.locationRegion, request.locationCountry].filter(Boolean);
+  if (parts.length === 0) return null;
+  return parts.join(', ');
 };
 
 const LotDetailsOffers = () => {
@@ -36,6 +46,11 @@ const LotDetailsOffers = () => {
   const [isOfferModalOpen, setOfferModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
+  const [chatOffer, setChatOffer] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [loadingChat, setLoadingChat] = useState(false);
+  const [sendingChat, setSendingChat] = useState(false);
 
   const requestIdParam = searchParams.get('id');
   const requestId = requestIdParam ? Number(requestIdParam) : NaN;
@@ -170,6 +185,52 @@ const LotDetailsOffers = () => {
     }
   };
 
+  const loadChatMessages = useCallback(
+    async (offerId) => {
+      if (!offerId) return;
+      setLoadingChat(true);
+      try {
+        const data = await listOfferMessages(offerId);
+        setChatMessages(Array.isArray(data) ? data : []);
+      } catch (error) {
+        setChatMessages([]);
+      } finally {
+        setLoadingChat(false);
+      }
+    },
+    []
+  );
+
+  const handleOpenChat = async (offer) => {
+    if (!offer) return;
+    setChatOffer(offer);
+    setChatOpen(true);
+    await loadChatMessages(offer.id);
+  };
+
+  const handleSendChatMessage = async ({ body, file }) => {
+    if (!chatOffer) return false;
+    setSendingChat(true);
+    try {
+      let attachmentUrl = null;
+      if (file) {
+        const upload = await uploadImageFile(file);
+        attachmentUrl = upload?.url || null;
+      }
+      const payload = {};
+      if (body) payload.body = body;
+      if (attachmentUrl) payload.attachmentUrl = attachmentUrl;
+      const message = await sendOfferMessage(chatOffer.id, payload);
+      setChatMessages((prev) => [...prev, message]);
+      return true;
+    } catch (error) {
+      setStatusMessage(error instanceof APIError ? error.message : 'Failed to send message.');
+      return false;
+    } finally {
+      setSendingChat(false);
+    }
+  };
+
   const handleEditLot = () => {
     if (!request) return;
     navigate(`/create-lot?id=${request.id}`);
@@ -242,6 +303,30 @@ const LotDetailsOffers = () => {
                       <p className="text-text-secondary mt-2 whitespace-pre-line">
                         {request.description || 'No description provided.'}
                       </p>
+                      <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-text-secondary">
+                        {request.category && (
+                          <span className="px-3 py-1 bg-primary-50 text-primary rounded-full font-medium capitalize">
+                            {request.category}
+                          </span>
+                        )}
+                        {request.subcategory && (
+                          <span className="px-3 py-1 bg-secondary-100 text-text-secondary rounded-full capitalize">
+                            {request.subcategory}
+                          </span>
+                        )}
+                        {formatLocation(request) && (
+                          <span className="inline-flex items-center space-x-1">
+                            <Icon name="MapPin" size={14} />
+                            <span>{formatLocation(request)}</span>
+                          </span>
+                        )}
+                        {request.deadlineAt && (
+                          <span className="inline-flex items-center space-x-1">
+                            <Icon name="Calendar" size={14} />
+                            <span>Needed by {new Date(request.deadlineAt).toLocaleDateString()}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -367,6 +452,7 @@ const LotDetailsOffers = () => {
               onEditOffer={handleOpenEditOffer}
               onDeleteOffer={handleDeleteOffer}
               onAcceptOffer={handleAcceptOffer}
+              onMessageSeller={handleOpenChat}
             />
           </div>
         </div>
@@ -381,6 +467,19 @@ const LotDetailsOffers = () => {
           setEditingOffer(null);
         }}
         onSubmit={handleSubmitOffer}
+      />
+
+      <ChatModal
+        open={chatOpen}
+        offer={chatOffer}
+        loading={loadingChat}
+        messages={chatMessages}
+        sending={sendingChat}
+        onSend={handleSendChatMessage}
+        onClose={() => {
+          setChatOpen(false);
+          setChatOffer(null);
+        }}
       />
     </div>
   );

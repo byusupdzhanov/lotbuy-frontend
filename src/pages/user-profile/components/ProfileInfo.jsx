@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Icon from 'components/AppIcon';
 import Image from 'components/AppImage';
 
-const ProfileInfo = ({ profile, saving, onSave, onUploadAvatar }) => {
+
+const ProfileInfo = ({ profile, stats, activeLots = [], saving, onSave, onUploadAvatar }) => {
+
   const [fullName, setFullName] = useState(profile?.fullName || '');
   const [error, setError] = useState(null);
 
@@ -64,6 +66,25 @@ const ProfileInfo = ({ profile, saving, onSave, onUploadAvatar }) => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Active Lots</p>
+          <p className="text-2xl font-semibold text-text-primary">{stats?.activeLots ?? 0}</p>
+        </div>
+        <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Pending Offers</p>
+          <p className="text-2xl font-semibold text-text-primary">{stats?.pendingOffers ?? 0}</p>
+        </div>
+        <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Completed Deals</p>
+          <p className="text-2xl font-semibold text-text-primary">{stats?.completedDeals ?? 0}</p>
+        </div>
+        <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Offers Made</p>
+          <p className="text-2xl font-semibold text-text-primary">{stats?.offersMade ?? 0}</p>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">Full name *</label>
@@ -89,6 +110,22 @@ const ProfileInfo = ({ profile, saving, onSave, onUploadAvatar }) => {
           </button>
         </div>
       </form>
+
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-text-primary">Recent lots</h3>
+        {activeLots.length === 0 ? (
+          <p className="text-sm text-text-secondary">You have not created any lots yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {activeLots.slice(0, 3).map((lot) => (
+              <div key={lot.id} className="border border-border rounded-lg p-3 bg-background">
+                <p className="font-medium text-sm text-text-primary line-clamp-2">{lot.title}</p>
+                <p className="text-xs text-text-secondary mt-1">{new Date(lot.createdAt).toLocaleDateString()}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -377,6 +377,21 @@ const CreateLot = () => {
         currencyCode: (formData.currency || 'USD').toUpperCase(),
       };
 
+      if (formData.category) {
+        payload.category = formData.category;
+      }
+      if (formData.location) {
+        payload.locationCity = formData.location;
+      }
+      if (formData.tags?.length) {
+        payload.subcategory = formData.tags[0];
+      }
+      if (Number.isFinite(Number(formData.duration)) && Number(formData.duration) > 0) {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + Number(formData.duration));
+        payload.deadlineAt = deadline.toISOString();
+      }
+
       const description = formData.description.trim();
       if (description) {
         payload.description = description;

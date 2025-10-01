@@ -15,8 +15,9 @@ const formatCurrency = (amount, currencyCode = 'USD') => {
   }
 };
 
-const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept }) => {
+const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMessage }) => {
   const createdLabel = new Date(offer.createdAt).toLocaleString();
+  const canMessage = isOwner || isSeller;
 
   return (
     <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
@@ -66,6 +67,15 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept }) => 
         </div>
 
         <div className="flex items-center gap-2">
+          {canMessage && (
+            <button
+              onClick={() => onMessage?.(offer)}
+              className="px-3 py-2 rounded-lg text-sm font-medium border border-secondary-300 text-text-secondary hover:text-primary hover:border-primary flex items-center space-x-1"
+            >
+              <Icon name="MessageCircle" size={14} />
+              <span>Message</span>
+            </button>
+          )}
           {isSeller && (
             <>
               <button
@@ -107,6 +117,7 @@ const OffersList = ({
   onEditOffer,
   onDeleteOffer,
   onAcceptOffer,
+  onMessageSeller,
 }) => {
   if (loading) {
     return (
@@ -143,6 +154,7 @@ const OffersList = ({
           onEdit={onEditOffer}
           onDelete={onDeleteOffer}
           onAccept={onAcceptOffer}
+          onMessage={onMessageSeller}
         />
       ))}
     </div>

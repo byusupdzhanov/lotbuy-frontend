@@ -9,6 +9,7 @@ import (
 
 type CreateOfferParams struct {
 	RequestID    int64
+	SellerID     int64
 	SellerName   string
 	SellerAvatar *string
 	SellerRating *float64
@@ -20,16 +21,17 @@ type CreateOfferParams struct {
 func (s *Store) CreateOffer(ctx context.Context, params CreateOfferParams) (*models.Offer, error) {
 	query := `
         INSERT INTO offers (
-            request_id, seller_name, seller_avatar_url, seller_rating,
+            request_id, seller_user_id, seller_name, seller_avatar_url, seller_rating,
             price_amount, currency_code, message
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id, request_id, seller_name, seller_avatar_url, seller_rating,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, request_id, seller_user_id, seller_name, seller_avatar_url, seller_rating,
                   price_amount, currency_code, message, status, created_at, updated_at
     `
 
 	var offer models.Offer
 	if err := s.db.QueryRowxContext(ctx, query,
 		params.RequestID,
+		params.SellerID,
 		params.SellerName,
 		params.SellerAvatar,
 		params.SellerRating,
@@ -44,7 +46,7 @@ func (s *Store) CreateOffer(ctx context.Context, params CreateOfferParams) (*mod
 }
 
 func (s *Store) GetOffer(ctx context.Context, id int64) (*models.Offer, error) {
-	query := `SELECT id, request_id, seller_name, seller_avatar_url, seller_rating,
+	query := `SELECT id, request_id, seller_user_id, seller_name, seller_avatar_url, seller_rating,
                      price_amount, currency_code, message, status, created_at, updated_at
               FROM offers WHERE id = $1`
 
@@ -56,7 +58,7 @@ func (s *Store) GetOffer(ctx context.Context, id int64) (*models.Offer, error) {
 }
 
 func (s *Store) ListOffersByRequest(ctx context.Context, requestID int64) ([]models.Offer, error) {
-	query := `SELECT id, request_id, seller_name, seller_avatar_url, seller_rating,
+	query := `SELECT id, request_id, seller_user_id, seller_name, seller_avatar_url, seller_rating,
                      price_amount, currency_code, message, status, created_at, updated_at
               FROM offers WHERE request_id = $1 ORDER BY created_at DESC`
 
@@ -80,4 +82,55 @@ func (s *Store) ListOffersByRequest(ctx context.Context, requestID int64) ([]mod
 func (s *Store) UpdateOfferStatus(ctx context.Context, id int64, status string) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE offers SET status = $1, updated_at = NOW() WHERE id = $2`, status, id)
 	return err
+}
+
+func (s *Store) ListOffersForBuyer(ctx context.Context, buyerID int64, status string, limit int) ([]models.Offer, error) {
+	query := `
+        SELECT o.id, o.request_id, o.seller_user_id, o.seller_name, o.seller_avatar_url, o.seller_rating,
+               o.price_amount, o.currency_code, o.message, o.status, o.created_at, o.updated_at
+        FROM offers o
+        INNER JOIN requests r ON r.id = o.request_id
+        WHERE r.buyer_user_id = $1 AND ($2 = '' OR o.status = $2)
+        ORDER BY o.created_at DESC
+        LIMIT $3
+    `
+
+	rows, err := s.db.QueryxContext(ctx, query, buyerID, status, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var offers []models.Offer
+	for rows.Next() {
+		var o models.Offer
+		if err := rows.StructScan(&o); err != nil {
+			return nil, err
+		}
+		offers = append(offers, o)
+	}
+	return offers, rows.Err()
+}
+
+func (s *Store) ListOffersBySeller(ctx context.Context, sellerID int64, status string) ([]models.Offer, error) {
+	query := `SELECT id, request_id, seller_user_id, seller_name, seller_avatar_url, seller_rating,
+                     price_amount, currency_code, message, status, created_at, updated_at
+              FROM offers WHERE seller_user_id = $1 AND ($2 = '' OR status = $2)
+              ORDER BY created_at DESC`
+
+	rows, err := s.db.QueryxContext(ctx, query, sellerID, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var offers []models.Offer
+	for rows.Next() {
+		var o models.Offer
+		if err := rows.StructScan(&o); err != nil {
+			return nil, err
+		}
+		offers = append(offers, o)
+	}
+	return offers, rows.Err()
 }

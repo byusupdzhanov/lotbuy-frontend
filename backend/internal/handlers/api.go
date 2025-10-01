@@ -36,18 +36,29 @@ func (a *API) RegisterRoutes(r *server.Router) {
 	r.Handle(http.MethodGet, "/api/me", a.handleGetMe)
 	r.Handle(http.MethodPatch, "/api/me", a.handleUpdateMe)
 
+	r.Handle(http.MethodGet, "/api/dashboard", a.handleGetDashboard)
+
 	r.Handle(http.MethodGet, "/api/requests", a.handleListRequests)
 	r.Handle(http.MethodPost, "/api/requests", a.handleCreateRequest)
+	r.Handle(http.MethodPatch, "/api/requests/:requestID", a.handleUpdateRequest)
+	r.Handle(http.MethodDelete, "/api/requests/:requestID", a.handleDeleteRequest)
+
 	r.Handle(http.MethodGet, "/api/requests/:requestID", a.handleGetRequest)
 	r.Handle(http.MethodGet, "/api/requests/:requestID/offers", a.handleListOffers)
 	r.Handle(http.MethodPost, "/api/requests/:requestID/offers", a.handleCreateOffer)
 
 	r.Handle(http.MethodPost, "/api/offers/:offerID/accept", a.handleAcceptOffer)
+	r.Handle(http.MethodGet, "/api/offers/:offerID/messages", a.handleListOfferMessages)
+	r.Handle(http.MethodPost, "/api/offers/:offerID/messages", a.handleCreateOfferMessage)
+
 
 	r.Handle(http.MethodGet, "/api/deals", a.handleListDeals)
 	r.Handle(http.MethodGet, "/api/deals/:dealID", a.handleGetDeal)
 	r.Handle(http.MethodPatch, "/api/deals/:dealID", a.handleUpdateDeal)
 	r.Handle(http.MethodPost, "/api/deals/:dealID/milestones/:milestoneID/complete", a.handleCompleteMilestone)
+
+	r.Handle(http.MethodGet, "/api/notifications", a.handleListNotifications)
+	r.Handle(http.MethodPost, "/api/notifications/:notificationID/read", a.handleMarkNotificationRead)
 
 	r.Handle(http.MethodPost, "/api/uploads", a.handleUpload)
 }
@@ -272,7 +283,33 @@ func (a *API) handleGetMe(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	httputil.JSON(w, http.StatusOK, user.Public())
+	stats, err := a.Store.GetUserStats(r.Context(), user.ID)
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load stats")
+		return
+	}
+
+	activeLimit := 5
+	requests, err := a.Store.ListRequests(r.Context(), store.ListRequestsParams{
+		BuyerID: &user.ID,
+		Limit:   &activeLimit,
+	})
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load lots")
+		return
+	}
+
+	response := struct {
+		models.PublicUser `json:",inline"`
+		Stats             store.UserStats  `json:"stats"`
+		ActiveLots        []models.Request `json:"activeLots"`
+	}{
+		PublicUser: user.Public(),
+		Stats:      stats,
+		ActiveLots: requests,
+	}
+
+	httputil.JSON(w, http.StatusOK, response)
 }
 
 type updateMePayload struct {
@@ -349,4 +386,92 @@ func (a *API) handleUpload(w http.ResponseWriter, r *http.Request) {
 	url := "data:" + contentType + ";base64," + encoded
 
 	httputil.JSON(w, http.StatusCreated, map[string]string{"url": url})
+}
+
+func (a *API) handleGetDashboard(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.requireAuth(w, r)
+	if !ok {
+		return
+	}
+
+	stats, err := a.Store.GetUserStats(r.Context(), user.ID)
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load stats")
+		return
+	}
+
+	activeLimit := 4
+	activeLots, err := a.Store.ListRequests(r.Context(), store.ListRequestsParams{
+		BuyerID: &user.ID,
+		Limit:   &activeLimit,
+	})
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load lots")
+		return
+	}
+
+	pendingOffers, err := a.Store.ListPendingOffersWithRequest(r.Context(), user.ID, 6)
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load offers")
+		return
+	}
+
+	notifications, err := a.Store.ListNotifications(r.Context(), user.ID, false, 6)
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load notifications")
+		return
+	}
+
+	response := map[string]interface{}{
+		"user":          user.Public(),
+		"stats":         stats,
+		"activeLots":    activeLots,
+		"pendingOffers": pendingOffers,
+		"notifications": notifications,
+	}
+
+	httputil.JSON(w, http.StatusOK, response)
+}
+
+func (a *API) handleListNotifications(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.requireAuth(w, r)
+	if !ok {
+		return
+	}
+
+	unreadOnly := strings.EqualFold(r.URL.Query().Get("unread"), "true")
+	limit := 0
+	if l := r.URL.Query().Get("limit"); l != "" {
+		if v, err := strconv.Atoi(l); err == nil {
+			limit = v
+		}
+	}
+
+	notifications, err := a.Store.ListNotifications(r.Context(), user.ID, unreadOnly, limit)
+	if err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to load notifications")
+		return
+	}
+
+	httputil.JSON(w, http.StatusOK, notifications)
+}
+
+func (a *API) handleMarkNotificationRead(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.requireAuth(w, r)
+	if !ok {
+		return
+	}
+
+	id, err := parseID(r, "notificationID")
+	if err != nil {
+		httputil.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := a.Store.MarkNotificationRead(r.Context(), user.ID, id); err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "failed to update notification")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
