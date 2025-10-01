@@ -1,15 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from 'components/ui/Header';
 import Icon from 'components/AppIcon';
 import Image from 'components/AppImage';
+import { useAuth } from 'context/AuthContext';
+import { APIError } from 'lib/api/client';
+import { createRequest, deleteRequest, getRequest, updateRequest } from 'lib/api/requests';
+import { uploadImage as uploadImageFile } from 'lib/api/uploads';
 
 const CreateLot = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user, initializing } = useAuth();
   const fileInputRef = useRef(null);
+  const [requestId, setRequestId] = useState(null);
+  const [isLoadingRequest, setIsLoadingRequest] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [primaryImageUrl, setPrimaryImageUrl] = useState(null);
+  const [imageUploadError, setImageUploadError] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
 
@@ -17,6 +28,7 @@ const CreateLot = () => {
     title: '',
     description: '',
     category: '',
+    currency: 'USD',
     budgetMin: 100,
     budgetMax: 1000,
     condition: '',
@@ -63,30 +75,85 @@ const CreateLot = () => {
     { id: 4, title: 'Advanced Options', description: 'Duration, requirements, settings' }
   ];
 
-  // Auto-save functionality
   useEffect(() => {
-    const autoSaveTimer = setTimeout(() => {
-      if (formData.title || formData.description) {
-        handleAutoSave();
-      }
-    }, 30000); // Auto-save every 30 seconds
-
-    return () => clearTimeout(autoSaveTimer);
-  }, [formData]);
-
-  const handleAutoSave = async () => {
-    setIsSaving(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setLastSaved(new Date());
-      console.log('Auto-saved lot data:', formData);
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    } finally {
-      setIsSaving(false);
+    if (!initializing && !user) {
+      navigate('/login-register', { replace: true, state: { from: '/create-lot' } });
     }
-  };
+  }, [initializing, user, navigate]);
+
+  useEffect(() => {
+    const idParam = searchParams.get('id');
+    if (!idParam) {
+      setRequestId(null);
+      setPrimaryImageUrl(null);
+      setFormData((prev) => ({
+        ...prev,
+        images: [],
+      }));
+      return;
+    }
+    const parsed = Number(idParam);
+    if (Number.isNaN(parsed)) {
+      setLoadError('Invalid lot identifier');
+      return;
+    }
+    setRequestId(parsed);
+  }, [searchParams]);
+
+  const loadRequest = useCallback(async (id) => {
+    setIsLoadingRequest(true);
+    setLoadError(null);
+    try {
+      const data = await getRequest(id);
+      setFormData((prev) => ({
+        ...prev,
+        title: data?.title ?? '',
+        description: data?.description ?? '',
+        category: prev.category,
+        currency: data?.currencyCode ?? prev.currency,
+        budgetMin: data?.budgetAmount ?? prev.budgetMin,
+        budgetMax: data?.budgetAmount ?? prev.budgetMax,
+        images: data?.imageUrl
+          ? [{ id: 'existing', url: data.imageUrl, uploadedUrl: data.imageUrl, name: 'Uploaded image', uploading: false }]
+          : [],
+      }));
+      setPrimaryImageUrl(data?.imageUrl ?? null);
+      setLastSaved(null);
+      setCurrentStep(1);
+      setIsPreviewMode(false);
+    } catch (error) {
+      if (error instanceof APIError && error.status === 404) {
+        setLoadError('Lot not found');
+      } else {
+        setLoadError(error.message || 'Failed to load lot');
+      }
+    } finally {
+      setIsLoadingRequest(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!requestId || !user) {
+      return;
+    }
+    loadRequest(requestId);
+  }, [requestId, user, loadRequest]);
+
+  const formatCurrency = useCallback(
+    (value) => {
+      const currencyCode = (formData.currency || 'USD').toUpperCase();
+      const numericValue = Number(value) || 0;
+      try {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: currencyCode,
+        }).format(numericValue);
+      } catch (error) {
+        return `$${numericValue.toLocaleString()}`;
+      }
+    },
+    [formData.currency]
+  );
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -113,19 +180,71 @@ const CreateLot = () => {
     }));
   };
 
-  const handleImageUpload = (files) => {
-    const newImages = Array.from(files).map(file => ({
-      id: Date.now() + Math.random(),
-      file,
-      url: URL.createObjectURL(file),
-      name: file.name,
-      size: file.size
-    }));
+  const revokePreviewUrl = useCallback((url) => {
+    if (url && url.startsWith('blob:')) {
+      URL.revokeObjectURL(url);
+    }
+  }, []);
 
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...newImages].slice(0, 10) // Max 10 images
-    }));
+  const uploadImage = useCallback(async (file, imageId) => {
+    setImageUploadError(null);
+    try {
+      const response = await uploadImageFile(file);
+      setFormData((prev) => ({
+        ...prev,
+        images: prev.images.map((image) =>
+          image.id === imageId
+            ? { ...image, uploading: false, uploadedUrl: response?.url || image.uploadedUrl, error: null }
+            : image
+        ),
+      }));
+      setPrimaryImageUrl(response?.url || null);
+    } catch (error) {
+      const message = error?.message || 'Failed to upload image';
+      setImageUploadError(message);
+      setFormData((prev) => ({
+        ...prev,
+        images: prev.images.map((image) =>
+          image.id === imageId
+            ? { ...image, uploading: false, error: message }
+            : image
+        ),
+      }));
+    }
+  }, []);
+
+  const handleImageUpload = (files) => {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const [file] = Array.from(files).filter((candidate) => candidate.type.startsWith('image/'));
+    if (!file) {
+      setImageUploadError('Please choose an image file.');
+      return;
+    }
+
+    const imageId = Date.now() + Math.random();
+    const previewUrl = URL.createObjectURL(file);
+
+    setImageUploadError(null);
+    setFormData((prev) => {
+      prev.images.forEach((image) => revokePreviewUrl(image.url));
+      return {
+        ...prev,
+        images: [{
+          id: imageId,
+          file,
+          url: previewUrl,
+          name: file.name,
+          size: file.size,
+          uploading: true,
+          error: null,
+        }],
+      };
+    });
+    setPrimaryImageUrl(null);
+    uploadImage(file, imageId);
   };
 
   const handleDrop = (e) => {
@@ -152,10 +271,26 @@ const CreateLot = () => {
   };
 
   const removeImage = (imageId) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter(img => img.id !== imageId)
-    }));
+    let removedUploadedUrl = null;
+    let remaining = 0;
+    setFormData((prev) => {
+      const nextImages = prev.images.filter((img) => {
+        if (img.id === imageId) {
+          revokePreviewUrl(img.url);
+          removedUploadedUrl = img.uploadedUrl || null;
+          return false;
+        }
+        return true;
+      });
+      remaining = nextImages.length;
+      return {
+        ...prev,
+        images: nextImages,
+      };
+    });
+    if ((removedUploadedUrl && removedUploadedUrl === primaryImageUrl) || remaining === 0) {
+      setPrimaryImageUrl(null);
+    }
   };
 
   const validateStep = (step) => {
@@ -225,23 +360,118 @@ const CreateLot = () => {
 
     if (!isValid) return;
 
+    if (formData.images.some((image) => image.uploading)) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: 'Please wait for the image upload to finish before publishing.',
+      }));
+      return;
+    }
+
     setIsPublishing(true);
+    setErrors((prev) => ({ ...prev, submit: '' }));
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Lot published:', formData);
-      navigate('/dashboard-home', { 
-        state: { 
-          message: 'Lot published successfully! Sellers can now make offers.',
-          type: 'success'
-        }
-      });
+      const payload = {
+        title: formData.title.trim(),
+        budgetAmount: Math.max(Number(formData.budgetMax) || 0, Number(formData.budgetMin) || 0),
+        currencyCode: (formData.currency || 'USD').toUpperCase(),
+      };
+
+      if (formData.category) {
+        payload.category = formData.category;
+      }
+      if (formData.location) {
+        payload.locationCity = formData.location;
+      }
+      if (formData.tags?.length) {
+        payload.subcategory = formData.tags[0];
+      }
+      if (Number.isFinite(Number(formData.duration)) && Number(formData.duration) > 0) {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + Number(formData.duration));
+        payload.deadlineAt = deadline.toISOString();
+      }
+
+      const description = formData.description.trim();
+      if (description) {
+        payload.description = description;
+      } else if (requestId) {
+        payload.description = null;
+      }
+
+      const imageUrl = primaryImageUrl || formData.images.find((img) => img.uploadedUrl)?.uploadedUrl || null;
+      if (imageUrl) {
+        payload.imageUrl = imageUrl;
+      } else if (requestId) {
+        payload.imageUrl = null;
+      }
+
+      let response;
+      if (requestId) {
+        response = await updateRequest(requestId, payload);
+      } else {
+        response = await createRequest(payload);
+      }
+
+      setLastSaved(new Date());
+
+      const targetId = requestId || response?.id;
+      if (targetId) {
+        navigate(`/lot-details-offers?id=${targetId}`, {
+          state: {
+            message: requestId ? 'Lot updated successfully.' : 'Lot published successfully! Sellers can now make offers.',
+            type: 'success',
+          },
+        });
+      } else {
+        navigate('/browse-lots');
+      }
     } catch (error) {
-      console.error('Publish failed:', error);
-      setErrors({ submit: 'Failed to publish lot. Please try again.' });
+      const message = error instanceof APIError ? error.message : 'Failed to publish lot. Please try again.';
+      setErrors({ submit: message });
     } finally {
       setIsPublishing(false);
     }
   };
+
+  const handleDeleteLot = async () => {
+    if (!requestId) return;
+    if (!window.confirm('Are you sure you want to delete this lot? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setErrors((prev) => ({ ...prev, submit: '' }));
+    try {
+      await deleteRequest(requestId);
+      navigate('/browse-lots', {
+        replace: true,
+        state: {
+          message: 'Lot deleted successfully.',
+          type: 'success',
+        },
+      });
+    } catch (error) {
+      const message = error instanceof APIError ? error.message : 'Failed to delete lot. Please try again.';
+      setErrors((prev) => ({ ...prev, submit: message }));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (initializing || isLoadingRequest) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-16">
+          <div className="container mx-auto px-4 py-20 text-center text-text-secondary">
+            <Icon name="Loader2" size={36} className="animate-spin mx-auto mb-4" />
+            <p className="text-sm">Loading lot details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -330,16 +560,35 @@ const CreateLot = () => {
                 Budget Range *
               </label>
               <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <label htmlFor="currency" className="text-xs text-text-secondary uppercase tracking-wide">
+                    Currency
+                  </label>
+                  <select
+                    id="currency"
+                    value={formData.currency}
+                    onChange={(e) => handleInputChange('currency', e.target.value.toUpperCase())}
+                    className="input-field w-32"
+                  >
+                    {['USD', 'EUR', 'GBP', 'AUD', 'CAD'].map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
                     <label className="block text-xs text-text-secondary mb-1">Minimum</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">$</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">
+                        {formData.currency}
+                      </span>
                       <input
                         type="number"
                         value={formData.budgetMin}
                         onChange={(e) => handleInputChange('budgetMin', parseInt(e.target.value) || 0)}
-                        className="input-field w-full pl-8"
+                        className="input-field w-full pl-14"
                         min="0"
                       />
                     </div>
@@ -347,12 +596,14 @@ const CreateLot = () => {
                   <div className="flex-1">
                     <label className="block text-xs text-text-secondary mb-1">Maximum</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">$</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">
+                        {formData.currency}
+                      </span>
                       <input
                         type="number"
                         value={formData.budgetMax}
                         onChange={(e) => handleInputChange('budgetMax', parseInt(e.target.value) || 0)}
-                        className="input-field w-full pl-8"
+                        className="input-field w-full pl-14"
                         min="0"
                       />
                     </div>
@@ -443,7 +694,7 @@ const CreateLot = () => {
                   Drag and drop images here, or click to browse
                 </p>
                 <p className="text-text-secondary text-sm mb-4">
-                  Upload up to 10 images (JPG, PNG, GIF up to 5MB each)
+                  Upload a primary image (JPG, PNG, GIF up to 5MB)
                 </p>
                 <button
                   type="button"
@@ -455,7 +706,6 @@ const CreateLot = () => {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  multiple
                   accept="image/*"
                   onChange={(e) => handleImageUpload(e.target.files)}
                   className="hidden"
@@ -467,17 +717,22 @@ const CreateLot = () => {
             {formData.images.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-text-primary mb-3">
-                  Uploaded Images ({formData.images.length}/10)
+                  Uploaded Image
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {formData.images.map((image) => (
                     <div key={image.id} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-secondary-100">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-secondary-100 relative">
                         <Image
                           src={image.url}
                           alt={image.name}
                           className="w-full h-full object-cover"
                         />
+                        {image.uploading && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs">
+                            Uploading...
+                          </div>
+                        )}
                       </div>
                       <button
                         type="button"
@@ -489,9 +744,17 @@ const CreateLot = () => {
                       <p className="text-xs text-text-secondary mt-1 truncate">
                         {image.name}
                       </p>
+                      {image.error && (
+                        <p className="text-xs text-error-500 mt-1">{image.error}</p>
+                      )}
                     </div>
                   ))}
                 </div>
+                {imageUploadError && (
+                  <div className="status-error mt-4 p-3 rounded-lg">
+                    <p className="text-sm">{imageUploadError}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -623,7 +886,7 @@ const CreateLot = () => {
             <div className="flex items-center space-x-2">
               <Icon name="DollarSign" size={16} className="text-success-500" />
               <span className="text-lg font-semibold text-success-500">
-                ${formData.budgetMin} - ${formData.budgetMax}
+                {`${formatCurrency(formData.budgetMin)} - ${formatCurrency(formData.budgetMax)}`}
               </span>
             </div>
           )}
@@ -652,7 +915,7 @@ const CreateLot = () => {
           </div>
 
           {/* Images */}
-          {formData.images.length > 0 && (
+          {(formData.images.length > 0 || primaryImageUrl) && (
             <div>
               <span className="text-xs text-text-secondary">Images</span>
               <div className="grid grid-cols-3 gap-2 mt-2">
@@ -665,6 +928,15 @@ const CreateLot = () => {
                     />
                   </div>
                 ))}
+                {primaryImageUrl && formData.images.length === 0 && (
+                  <div className="aspect-square rounded overflow-hidden bg-secondary-100">
+                    <Image
+                      src={primaryImageUrl}
+                      alt="Primary lot image"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 {formData.images.length > 3 && (
                   <div className="aspect-square rounded bg-secondary-100 flex items-center justify-center">
                     <span className="text-xs text-text-secondary">+{formData.images.length - 3}</span>
@@ -684,6 +956,12 @@ const CreateLot = () => {
       
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {loadError && (
+            <div className="status-error mb-6 p-4 rounded-lg">
+              <p className="text-sm">{loadError}</p>
+            </div>
+          )}
+
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -696,18 +974,12 @@ const CreateLot = () => {
               
               {/* Auto-save status */}
               <div className="flex items-center space-x-4">
-                {isSaving && (
-                  <div className="flex items-center space-x-2 text-text-secondary">
-                    <Icon name="Loader2" size={16} className="animate-spin" />
-                    <span className="text-sm">Saving...</span>
-                  </div>
-                )}
-                {lastSaved && !isSaving && (
+                {lastSaved && (
                   <div className="text-sm text-text-secondary">
-                    Last saved: {lastSaved.toLocaleTimeString()}
+                    Last updated: {lastSaved.toLocaleTimeString()}
                   </div>
                 )}
-                
+
                 {/* Preview Toggle (Desktop) */}
                 <button
                   onClick={() => setIsPreviewMode(!isPreviewMode)}
@@ -789,24 +1061,26 @@ const CreateLot = () => {
                         </button>
                       ) : (
                         <div className="flex items-center space-x-3">
-                          <button
-                            type="button"
-                            onClick={handleSaveDraft}
-                            disabled={isSaving}
-                            className="btn-secondary px-6 py-2 rounded-lg flex items-center space-x-2"
-                          >
-                            {isSaving ? (
-                              <>
-                                <Icon name="Loader2" size={16} className="animate-spin" />
-                                <span>Saving...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Icon name="Save" size={16} />
-                                <span>Save Draft</span>
-                              </>
-                            )}
-                          </button>
+                          {requestId && (
+                            <button
+                              type="button"
+                              onClick={handleDeleteLot}
+                              disabled={isDeleting}
+                              className="btn-secondary px-6 py-2 rounded-lg flex items-center space-x-2 border-error-300 text-error-600 hover:bg-error-50"
+                            >
+                              {isDeleting ? (
+                                <>
+                                  <Icon name="Loader2" size={16} className="animate-spin" />
+                                  <span>Deleting...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Icon name="Trash" size={16} />
+                                  <span>Delete Lot</span>
+                                </>
+                              )}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={handlePublishLot}
