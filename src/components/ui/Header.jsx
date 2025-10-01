@@ -31,12 +31,6 @@ const Header = () => {
       icon: 'Search',
       tooltip: 'Find lots to bid on'
     },
-        {
-      label: 'Deals',
-      path: '/deals',
-      icon: 'Handshake',
-      tooltip: 'Manage your active deals'
-    },
     {
       label: 'Deals',
       path: '/deals',

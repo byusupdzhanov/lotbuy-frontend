@@ -417,3 +417,4 @@ func (a *API) handleDeleteRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
