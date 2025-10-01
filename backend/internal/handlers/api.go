@@ -42,7 +42,6 @@ func (a *API) RegisterRoutes(r *server.Router) {
 	r.Handle(http.MethodPost, "/api/requests", a.handleCreateRequest)
 	r.Handle(http.MethodPatch, "/api/requests/:requestID", a.handleUpdateRequest)
 	r.Handle(http.MethodDelete, "/api/requests/:requestID", a.handleDeleteRequest)
-
 	r.Handle(http.MethodGet, "/api/requests/:requestID", a.handleGetRequest)
 	r.Handle(http.MethodGet, "/api/requests/:requestID/offers", a.handleListOffers)
 	r.Handle(http.MethodPost, "/api/requests/:requestID/offers", a.handleCreateOffer)
@@ -50,7 +49,6 @@ func (a *API) RegisterRoutes(r *server.Router) {
 	r.Handle(http.MethodPost, "/api/offers/:offerID/accept", a.handleAcceptOffer)
 	r.Handle(http.MethodGet, "/api/offers/:offerID/messages", a.handleListOfferMessages)
 	r.Handle(http.MethodPost, "/api/offers/:offerID/messages", a.handleCreateOfferMessage)
-
 
 	r.Handle(http.MethodGet, "/api/deals", a.handleListDeals)
 	r.Handle(http.MethodGet, "/api/deals/:dealID", a.handleGetDeal)
@@ -474,4 +472,3 @@ func (a *API) handleMarkNotificationRead(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}

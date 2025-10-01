@@ -58,6 +58,30 @@ const DashboardHome = () => {
     }
   };
 
+  const currentUser = dashboardData?.user || user || null;
+  const stats = dashboardData?.stats;
+
+  const quickStats = useMemo(() => ({
+    activeLots: stats?.activeLots ?? 0,
+    pendingOffers: stats?.pendingOffers ?? 0,
+    ongoingDeals: stats?.activeDeals ?? 0,
+    unreadMessages: stats?.incomingMessages ?? 0,
+  }), [stats]);
+
+  const welcomeName = useMemo(() => {
+    if (!currentUser?.fullName) return 'there';
+    return currentUser.fullName.split(' ')[0];
+  }, [currentUser?.fullName]);
+
+  const profileSummary = useMemo(() => {
+    if (!currentUser) return null;
+    return {
+      avatar: currentUser.avatarUrl,
+      rating: stats?.completedDeals ? Math.min(5, 4 + stats.completedDeals / 50).toFixed(1) : null,
+      deals: stats?.completedDeals ?? 0,
+    };
+  }, [currentUser, stats]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -89,29 +113,6 @@ const DashboardHome = () => {
       </div>
     );
   }
-
-  const currentUser = dashboardData?.user || user || null;
-
-  const quickStats = useMemo(() => ({
-    activeLots: dashboardData?.stats?.activeLots ?? 0,
-    pendingOffers: dashboardData?.stats?.pendingOffers ?? 0,
-    ongoingDeals: dashboardData?.stats?.activeDeals ?? 0,
-    unreadMessages: dashboardData?.stats?.incomingMessages ?? 0,
-  }), [dashboardData?.stats]);
-
-  const welcomeName = useMemo(() => {
-    if (!currentUser?.fullName) return 'there';
-    return currentUser.fullName.split(' ')[0];
-  }, [currentUser?.fullName]);
-
-  const profileSummary = useMemo(() => {
-    if (!currentUser) return null;
-    return {
-      avatar: currentUser.avatarUrl,
-      rating: dashboardData?.stats?.completedDeals ? Math.min(5, 4 + dashboardData.stats.completedDeals / 50).toFixed(1) : null,
-      deals: dashboardData?.stats?.completedDeals ?? 0,
-    };
-  }, [currentUser, dashboardData?.stats]);
 
   return (
     <div className="min-h-screen bg-background">

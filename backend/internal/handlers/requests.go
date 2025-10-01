@@ -103,7 +103,6 @@ func (a *API) handleListRequests(w http.ResponseWriter, r *http.Request) {
 	if status != "" {
 		params.Status = &status
 	}
-
 	if limitParam != "" {
 		if v, err := strconv.Atoi(limitParam); err == nil {
 			params.Limit = &v
@@ -418,4 +417,3 @@ func (a *API) handleDeleteRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
