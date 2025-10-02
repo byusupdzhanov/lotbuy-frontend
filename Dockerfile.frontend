@@ -1,0 +1,19 @@
+# --- build stage ---
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Используй то, что есть у тебя (npm/pnpm/yarn). Ниже — npm:
+RUN npm ci || npm i
+COPY . .
+# Если фронт и бэкенд в одном репо, убедись что в корне именно фронт (index.html, vite.config.mjs, src/)
+RUN npm run build
+
+# --- runtime stage ---
+FROM node:20-alpine
+WORKDIR /app
+RUN npm i -g serve
+# Копируем собранную статику
+COPY --from=build /app/dist /app/dist
+# По умолчанию слушаем 4028
+EXPOSE 4028
+CMD ["serve", "-s", "dist", "-l", "4028"]

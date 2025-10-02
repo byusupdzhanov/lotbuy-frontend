@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lotbuy-postgres
+    environment:
+      POSTGRES_DB: lotbuy
+      POSTGRES_USER: lotuser
+      POSTGRES_PASSWORD: lotpass
+    ports:
+      - "5432:5432"  # тебе удобно руками миграции через psql с хоста
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lotuser -d lotbuy"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: lotbuy-backend
+    environment:
+      # ОБРАТИ ВНИМАНИЕ: используем host=postgres (имя сервиса), не localhost
+      LOTBUY_DATABASE_URL: postgres://lotuser:lotpass@postgres:5432/lotbuy?sslmode=disable
+      LOTBUY_AUTH_SECRET: tbctw5Z6n4I6z0kHDteL5cmYj4WZtV3v
+      PORT: "8080"
+      # Добавь свои переменные (JWT_SECRET, CORS_ORIGINS и т.д.)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: lotbuy-frontend
+    ports:
+      - "4028:4028"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pg_data:
