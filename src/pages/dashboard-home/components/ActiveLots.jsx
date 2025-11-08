@@ -51,21 +51,21 @@ const ActiveLots = ({ lots = [], onViewLot }) => {
   return (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-text-primary">Your Active Lots</h2>
+        <h2 className="text-xl font-semibold text-text-primary">Ваши активные лоты</h2>
         <button className="text-sm text-primary hover:underline" onClick={() => onViewLot?.(lots[0]?.id)}>
-          View All Lots
+          Посмотреть все
         </button>
       </div>
 
       {lots.length === 0 ? (
         <div className="text-center py-8">
           <Icon name="Package" size={48} className="text-secondary-300 mx-auto mb-3" />
-          <p className="text-text-secondary mb-2">No active lots</p>
+          <p className="text-text-secondary mb-2">Нет активных лотов</p>
           <p className="text-sm text-text-secondary mb-4">
-            Create your first lot to start receiving offers
+            Сделайте первый шаг и создайте новый лот для продажи ваших товаров или услуг.
           </p>
           <button className="btn-primary px-4 py-2 rounded-lg text-sm">
-            Create Lot
+            Создать лот
           </button>
         </div>
       ) : (

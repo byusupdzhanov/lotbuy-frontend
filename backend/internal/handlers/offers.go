@@ -80,8 +80,8 @@ func (a *API) handleCreateOffer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.BuyerID != nil {
-		title := "New offer on " + req.Title
-		body := sellerName + " submitted an offer."
+		title := "Новое предложения для лота " + req.Title
+		body := sellerName + " отправил предложение"
 		meta, _ := json.Marshal(map[string]interface{}{
 			"offerId":   offer.ID,
 			"requestId": requestID,
@@ -251,7 +251,7 @@ func (a *API) handleCreateOfferMessage(w http.ResponseWriter, r *http.Request) {
 		recipientID = req.BuyerID
 	}
 	if recipientID != nil {
-		body := user.FullName + " sent you a message"
+		body := user.FullName + " отправил вам сообщение"
 		meta, _ := json.Marshal(map[string]interface{}{
 			"offerId":   offerID,
 			"requestId": offer.RequestID,
@@ -259,7 +259,7 @@ func (a *API) handleCreateOfferMessage(w http.ResponseWriter, r *http.Request) {
 		_, _ = a.Store.CreateNotification(r.Context(), store.CreateNotificationParams{
 			UserID:   *recipientID,
 			Type:     "message.new",
-			Title:    "New message",
+			Title:    "Новое сообщение",
 			Body:     &body,
 			Metadata: meta,
 		})

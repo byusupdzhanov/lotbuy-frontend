@@ -36,39 +36,39 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
     const newErrors = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = 'забыли указать имя';
     } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
+      newErrors.firstName = 'минимум 2 символа';
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = 'забыли указать фамилию';
     } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
+      newErrors.lastName = 'минимум 2 символа';
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'забыли указать почту';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'пожалуйста укажите корректный email';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'забыли указать пароль';
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = 'Пароль должен содержать минимум 8 символов';
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+      newErrors.password = 'Пароль должен содержать заглавную букву, строчную букву и цифру';
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = 'Пожалуйста, подтвердите пароль';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Пароли не совпадают';
     }
 
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'You must accept the terms and conditions';
+      newErrors.acceptTerms = 'Вы должны принять условия обслуживания';
     }
 
     setErrors(newErrors);
@@ -133,7 +133,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium text-text-primary mb-2">
-            First Name
+            Имя
           </label>
           <input
             type="text"
@@ -142,7 +142,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
             value={formData.firstName}
             onChange={handleInputChange}
             className={`input-field w-full ${errors.firstName ? 'border-error-500 focus:ring-error-500' : ''}`}
-            placeholder="John"
+            placeholder="Иван"
             disabled={isLoading}
           />
           {errors.firstName && (
@@ -152,7 +152,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
         
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium text-text-primary mb-2">
-            Last Name
+            Фамилия
           </label>
           <input
             type="text"
@@ -161,7 +161,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
             value={formData.lastName}
             onChange={handleInputChange}
             className={`input-field w-full ${errors.lastName ? 'border-error-500 focus:ring-error-500' : ''}`}
-            placeholder="Doe"
+            placeholder="Иванов"
             disabled={isLoading}
           />
           {errors.lastName && (
@@ -173,7 +173,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
       {/* Email Field */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
-          Email Address
+          Почта
         </label>
         <div className="relative">
           <input
@@ -183,7 +183,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
             value={formData.email}
             onChange={handleInputChange}
             className={`input-field w-full pl-10 ${errors.email ? 'border-error-500 focus:ring-error-500' : ''}`}
-            placeholder="john@example.com"
+            placeholder="ivaivanov@example.com"
             disabled={isLoading}
           />
           <Icon 
@@ -200,7 +200,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
       {/* User Type Selection */}
       <div>
         <label className="block text-sm font-medium text-text-primary mb-3">
-          I want to primarily:
+          Я хочу:
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
@@ -219,9 +219,9 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
               <Icon name="ShoppingCart" size={20} className={formData.userType === 'buyer' ? 'text-primary' : 'text-text-secondary'} />
               <div>
                 <p className={`font-medium ${formData.userType === 'buyer' ? 'text-primary' : 'text-text-primary'}`}>
-                  Buy Items
+                  Покупать
                 </p>
-                <p className="text-xs text-text-secondary">Create lots to receive offers</p>
+                <p className="text-xs text-text-secondary">Создавать лоты и получать предложения</p>
               </div>
             </div>
           </label>
@@ -242,9 +242,9 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
               <Icon name="Tag" size={20} className={formData.userType === 'seller' ? 'text-primary' : 'text-text-secondary'} />
               <div>
                 <p className={`font-medium ${formData.userType === 'seller' ? 'text-primary' : 'text-text-primary'}`}>
-                  Sell Items
+                  Продавать
                 </p>
-                <p className="text-xs text-text-secondary">Make offers on buyer lots</p>
+                <p className="text-xs text-text-secondary">Отправлять предложения</p>
               </div>
             </div>
           </label>
@@ -255,7 +255,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
-            Password
+            Пароль
           </label>
           <div className="relative">
             <input
@@ -289,7 +289,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
         
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary mb-2">
-            Confirm Password
+            Подтверждение пароля
           </label>
           <div className="relative">
             <input
@@ -336,13 +336,13 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
             disabled={isLoading}
           />
           <span className="text-sm text-text-secondary">
-            I agree to the{' '}
+            Я соглашаюсь с{' '}
             <button type="button" className="text-primary hover:underline">
-              Terms of Service
+              Условия обслуживания
             </button>{' '}
-            and{' '}
+            и{' '}
             <button type="button" className="text-primary hover:underline">
-              Privacy Policy
+              Политика безопасности
             </button>
           </span>
         </label>
@@ -360,7 +360,7 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
             disabled={isLoading}
           />
           <span className="text-sm text-text-secondary">
-            I'd like to receive updates about new features and marketplace tips
+            Я согласен получать маркетинговые материалы и обновления по электронной почте
           </span>
         </label>
       </div>
@@ -381,12 +381,12 @@ const RegisterForm = ({ onSuccess, isLoading, setIsLoading }) => {
         {isLoading ? (
           <>
             <Icon name="Loader2" size={18} className="animate-spin" />
-            <span>Creating Account...</span>
+            <span>Создание аккаунта...</span>
           </>
         ) : (
           <>
             <Icon name="UserPlus" size={18} />
-            <span>Create Account</span>
+            <span>Создать аккаунт</span>
           </>
         )}
       </button>

@@ -24,18 +24,18 @@ const RecentActivity = ({ activities = [], onActivityAction }) => {
   return (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-text-primary">Recent Activity</h2>
+        <h2 className="text-xl font-semibold text-text-primary">Недавняя активность</h2>
         <button className="text-sm text-primary hover:underline">
-          View All
+          Посмотреть все
         </button>
       </div>
 
       {activities.length === 0 ? (
         <div className="text-center py-8">
           <Icon name="Activity" size={48} className="text-secondary-300 mx-auto mb-3" />
-          <p className="text-text-secondary">No recent activity</p>
+          <p className="text-text-secondary">Нет активности</p>
           <p className="text-sm text-text-secondary mt-1">
-            Your activity will appear here
+            Ваша активность появится здесь
           </p>
         </div>
       ) : (

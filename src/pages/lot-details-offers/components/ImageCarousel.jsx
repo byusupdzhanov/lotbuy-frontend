@@ -41,7 +41,7 @@ const ImageCarousel = ({ images = [] }) => {
       <div className="relative w-full h-64 lg:h-96 bg-secondary-100 rounded-lg flex items-center justify-center">
         <div className="text-center">
           <Icon name="ImageOff" size={48} className="text-secondary-400 mx-auto mb-2" />
-          <p className="text-secondary-500 text-sm">No images available</p>
+          <p className="text-secondary-500 text-sm">Нет изображений</p>
         </div>
       </div>
     );
@@ -120,7 +120,7 @@ const ImageCarousel = ({ images = [] }) => {
       {/* Touch/Swipe Indicators for Mobile */}
       <div className="lg:hidden absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center space-x-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
         <Icon name="Smartphone" size={12} />
-        <span>Swipe to navigate</span>
+        <span>Листайте для навигации</span>
       </div>
     </div>
   );

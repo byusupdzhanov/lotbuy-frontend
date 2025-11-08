@@ -20,7 +20,7 @@ const MakeOfferModal = ({ open, lot, initialValues, onClose, onSubmit }) => {
   }, [initialValues, lot]);
 
   const heading = useMemo(
-    () => (initialValues ? 'Update your offer' : 'Submit an offer'),
+    () => (initialValues ? 'Обновить предложение' : 'Отправить предложение'),
     [initialValues]
   );
 
@@ -70,7 +70,7 @@ const MakeOfferModal = ({ open, lot, initialValues, onClose, onSubmit }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-text-primary">Offer amount *</label>
+            <label className="text-sm font-medium text-text-primary">Стоимость *</label>
             <div className="flex items-center space-x-3">
               <input
                 type="number"
@@ -97,16 +97,16 @@ const MakeOfferModal = ({ open, lot, initialValues, onClose, onSubmit }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-text-primary">Message to buyer</label>
+            <label className="text-sm font-medium text-text-primary">Сообщение покупателю</label>
             <textarea
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               rows={4}
               className="input-field"
-              placeholder="Share any relevant details for the buyer"
+              placeholder="Поделитесь любой важной информацией для покупателя."
             />
             <p className="text-xs text-text-secondary">
-              Optional. Provide delivery timing, condition details, or other helpful information.
+              Необязательно. Укажите сроки доставки, состояние товара или другую полезную информацию.
             </p>
           </div>
 
@@ -134,12 +134,12 @@ const MakeOfferModal = ({ open, lot, initialValues, onClose, onSubmit }) => {
               {submitting ? (
                 <>
                   <Icon name="Loader2" size={16} className="animate-spin" />
-                  <span>Submitting</span>
+                  <span>Подтверждаем</span>
                 </>
               ) : (
                 <>
                   <Icon name="Send" size={16} />
-                  <span>{initialValues ? 'Update offer' : 'Submit offer'}</span>
+                  <span>{initialValues ? 'Обновить предложение' : 'Отправить'}</span>
                 </>
               )}
             </button>

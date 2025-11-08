@@ -71,9 +71,9 @@ const BrowseLots = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary">Browse lots</h1>
+              <h1 className="text-3xl font-bold text-text-primary">Поиск лотов</h1>
               <p className="text-text-secondary mt-1">
-                Explore what buyers are looking for and submit an offer if you can help.
+                Просматривайте доступные лоты и делайте предложения покупателям
               </p>
             </div>
 
@@ -84,7 +84,7 @@ const BrowseLots = () => {
                 className="inline-flex items-center space-x-2 px-4 py-2 border border-border rounded-lg text-sm hover:bg-secondary-50 disabled:opacity-60"
               >
                 <Icon name={refreshing ? 'Loader2' : 'RefreshCw'} size={16} className={refreshing ? 'animate-spin' : ''} />
-                <span>{refreshing ? 'Refreshing' : 'Refresh'}</span>
+                <span>{refreshing ? 'Обновление' : 'Обновить'}</span>
               </button>
               {user && (
                 <button
@@ -92,7 +92,7 @@ const BrowseLots = () => {
                   className="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
                 >
                   <Icon name="Plus" size={16} />
-                  <span>Create lot</span>
+                  <span>Создать лот</span>
                 </button>
               )}
             </div>
@@ -108,7 +108,7 @@ const BrowseLots = () => {
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by title, description, or buyer"
+              placeholder="Можно искать по названию, описанию или имени покупателя"
               className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-surface focus:border-primary focus:ring-2 focus:ring-primary-100"
             />
           </form>
@@ -131,13 +131,13 @@ const BrowseLots = () => {
           {!loading && filteredRequests.length === 0 && (
             <div className="bg-surface border border-border rounded-xl p-10 text-center">
               <Icon name="Compass" size={40} className="mx-auto text-secondary-300 mb-4" />
-              <h2 className="text-xl font-semibold text-text-primary mb-2">No lots found</h2>
+              <h2 className="text-xl font-semibold text-text-primary mb-2">Лотов не найдено</h2>
               <p className="text-text-secondary mb-4">
-                Try adjusting your search or check back later for new requests from buyers.
+                Попробуйте изменить поисковый запрос или создайте свой собственный лот
               </p>
               {user && (
                 <button onClick={handleCreateLot} className="btn-primary px-4 py-2 rounded-lg">
-                  Create your own lot
+                  Создать свой лот
                 </button>
               )}
             </div>

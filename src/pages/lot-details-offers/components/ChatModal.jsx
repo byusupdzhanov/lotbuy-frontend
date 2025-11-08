@@ -71,14 +71,14 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
   };
 
   const conversationTitle = useMemo(
-    () => `Conversation with ${counterpartName}`,
+    () => `Диалог с ${counterpartName}`,
     [counterpartName]
   );
 
   const resolveSenderLabel = useCallback(
     (senderId) => {
       if (senderId === currentUserId) {
-        return 'You';
+        return 'Вы';
       }
       if (buyerId != null && senderId === buyerId) {
         return buyerName;
@@ -86,7 +86,7 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
       if (sellerId != null && senderId === sellerId) {
         return sellerName;
       }
-      return 'Participant';
+      return 'Участник';
     },
     [buyerId, buyerName, currentUserId, sellerId, sellerName]
   );
@@ -109,7 +109,7 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
             </div>
             <div>
               <h3 className="font-semibold text-text-primary">{conversationTitle}</h3>
-              <p className="text-xs text-text-secondary">Offer submitted {new Date(offer?.createdAt).toLocaleString()}</p>
+              <p className="text-xs text-text-secondary">Предложение подтверждено {new Date(offer?.createdAt).toLocaleString()}</p>
             </div>
           </div>
           <button
@@ -124,11 +124,11 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
           {loading ? (
             <div className="h-full flex items-center justify-center text-text-secondary">
               <Icon name="Loader2" size={24} className="animate-spin mr-2" />
-              Loading conversation...
+              Загружаем диалог...
             </div>
           ) : messages.length === 0 ? (
             <div className="text-center text-text-secondary text-sm py-10">
-              No messages yet. Start the conversation!
+              Нет сообщений. Начните диалог, отправив сообщение.
             </div>
           ) : (
             messages.map((message) => (
@@ -176,7 +176,7 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
                 }}
                 className="text-xs text-text-secondary hover:text-text-primary"
               >
-                Remove
+                Удалить
               </button>
             </div>
           )}
@@ -202,12 +202,12 @@ const ChatModal = ({ open, offer, loading, messages = [], sending, onSend, onClo
                 {sending ? (
                   <>
                     <Icon name="Loader2" size={16} className="animate-spin" />
-                    <span>Sending</span>
+                    <span>Отправляем</span>
                   </>
                 ) : (
                   <>
                     <Icon name="Send" size={16} />
-                    <span>Send</span>
+                    <span>Отправить</span>
                   </>
                 )}
               </button>

@@ -29,14 +29,14 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
   }, [isOpen]);
 
   const categories = [
-    'Electronics',
-    'Furniture',
-    'Automotive',
-    'Fashion',
-    'Home & Garden',
-    'Sports & Outdoors',
-    'Books & Media',
-    'Collectibles'
+    'Электроника',
+    'Фурнитура',
+    'Автомобили',
+    'Мода',
+    'Дом и Сад',
+    'Спорт',
+    'Книги и Медиа',
+    'Коллекции'
   ];
 
   const conditions = [
@@ -110,7 +110,7 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
         {/* Header */}
         <div className="sticky top-0 bg-surface border-b border-border p-4 z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-text-primary">Filters</h2>
+            <h2 className="text-lg font-semibold text-text-primary">Фильтры</h2>
             <button
               onClick={onClose}
               className="p-2 text-text-secondary hover:text-text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200"
@@ -133,7 +133,7 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
               onClick={() => toggleSection('category')}
               className="flex items-center justify-between w-full mb-3"
             >
-              <h3 className="text-base font-medium text-text-primary">Category</h3>
+              <h3 className="text-base font-medium text-text-primary">Категория</h3>
               <Icon 
                 name={expandedSections.category ? "ChevronUp" : "ChevronDown"} 
                 size={18} 
@@ -152,7 +152,7 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
                     onChange={(e) => handleFilterChange('category', e.target.value)}
                     className="mr-3 text-primary focus:ring-primary-500"
                   />
-                  <span className="text-sm text-text-secondary">All Categories</span>
+                  <span className="text-sm text-text-secondary">Все категории</span>
                 </label>
                 {categories.map((category) => (
                   <label key={category} className="flex items-center">
@@ -177,7 +177,7 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
               onClick={() => toggleSection('budget')}
               className="flex items-center justify-between w-full mb-3"
             >
-              <h3 className="text-base font-medium text-text-primary">Budget Range</h3>
+              <h3 className="text-base font-medium text-text-primary">Диапазон бюджета</h3>
               <Icon 
                 name={expandedSections.budget ? "ChevronUp" : "ChevronDown"} 
                 size={18} 
@@ -190,7 +190,7 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
-                      Min ($)
+                      Мин ($)
                     </label>
                     <input
                       type="number"
@@ -202,7 +202,7 @@ const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1">
-                      Max ($)
+                      Макс ($)
                     </label>
                     <input
                       type="number"

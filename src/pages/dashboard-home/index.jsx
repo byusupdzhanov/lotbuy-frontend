@@ -94,7 +94,7 @@ const DashboardHome = () => {
         <div className="pt-16 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <Icon name="Loader2" size={48} className="text-primary animate-spin mx-auto mb-4" />
-            <p className="text-text-secondary">Loading your dashboard...</p>
+            <p className="text-text-secondary">Загружаем главную страницу...</p>
           </div>
         </div>
       </div>
@@ -109,9 +109,9 @@ const DashboardHome = () => {
           <div className="text-center max-w-md px-6">
             <Icon name="AlertTriangle" size={48} className="text-error-500 mx-auto mb-4" />
             <p className="text-text-primary font-semibold mb-2">{error}</p>
-            <p className="text-text-secondary mb-6">Try refreshing the dashboard to load the latest information.</p>
+            <p className="text-text-secondary mb-6">Попробуйте перезагрузить главную страницу</p>
             <button onClick={loadDashboard} className="btn-primary px-5 py-2 rounded-lg text-sm font-medium">
-              Retry
+              Перезагрузить
             </button>
           </div>
         </div>
@@ -130,18 +130,18 @@ const DashboardHome = () => {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-text-primary mb-2">
-                  Welcome back, {welcomeName}!
+                  С возвращением, {welcomeName}!
                 </h1>
                 <p className="text-text-secondary">
-                  Manage your lots, review offers, and complete deals all in one place.
+                  Управляйте своими лотами, просматривайте предложения и совершайте сделки — все в одном месте
                 </p>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:flex items-center space-x-2 text-sm text-text-secondary">
                   <Icon name="Star" size={16} className="text-accent-500" />
-                  <span>{profileSummary?.rating ?? '—'} rating</span>
+                  <span>{profileSummary?.rating ?? '—'} рейтинг</span>
                   <span>•</span>
-                  <span>{profileSummary?.deals ?? 0} deals</span>
+                  <span>{profileSummary?.deals ?? 0} сделок</span>
                 </div>
                 <button
                   onClick={() => handleQuickAction('view_profile')}
@@ -169,8 +169,8 @@ const DashboardHome = () => {
                     <Icon name="Plus" size={24} color="white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">Create New Lot</h3>
-                    <p className="text-white text-opacity-80 text-sm">Post what you're looking to buy</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">Создать новый лот</h3>
+                    <p className="text-white text-opacity-80 text-sm">Опишите то, что хотите купить</p>
                   </div>
                 </div>
               </button>
@@ -184,8 +184,8 @@ const DashboardHome = () => {
                     <Icon name="Search" size={24} className="text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-text-primary mb-1">Browse Available Lots</h3>
-                    <p className="text-text-secondary text-sm">Find lots to make offers on</p>
+                    <h3 className="text-lg font-semibold text-text-primary mb-1">Смотреть доступные лоты</h3>
+                    <p className="text-text-secondary text-sm">Смотрите лоты, отправляйте предложения</p>
                   </div>
                 </div>
               </button>

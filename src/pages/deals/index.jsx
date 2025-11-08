@@ -14,46 +14,46 @@ import {
 import { APIError } from 'lib/api/client';
 
 const DEAL_TABS = [
-  { id: 'all', label: 'All deals' },
-  { id: 'active', label: 'Active' },
-  { id: 'awaiting', label: 'Awaiting actions' },
-  { id: 'completed', label: 'Completed' },
-  { id: 'disputes', label: 'Disputes' }
+  { id: 'all', label: 'Все сделки' },
+  { id: 'active', label: 'Активные' },
+  { id: 'awaiting', label: 'Ожидающие действий' },
+  { id: 'completed', label: 'Выполненные' },
+  { id: 'disputes', label: 'Споры' }
 ];
 
 const statusConfig = {
   active: {
-    label: 'In progress',
+    label: 'В процессе',
     tone: 'bg-primary-50 text-primary border border-primary-200',
     icon: 'Handshake'
   },
   awaiting_payment: {
-    label: 'Awaiting payment',
+    label: 'Ожидание оплаты',
     tone: 'bg-warning-50 text-warning-600 border border-warning-200',
     icon: 'CreditCard'
   },
   awaiting_shipment: {
-    label: 'Awaiting shipment',
+    label: 'Ожидание доставки',
     tone: 'bg-warning-50 text-warning-600 border border-warning-200',
     icon: 'Truck'
   },
   awaiting_confirmation: {
-    label: 'Awaiting confirmation',
+    label: 'Ожидание подтверждения',
     tone: 'bg-warning-50 text-warning-600 border border-warning-200',
     icon: 'Clock'
   },
   completed: {
-    label: 'Completed',
+    label: 'Выполнено',
     tone: 'bg-success-50 text-success-600 border border-success-200',
     icon: 'CheckCircle'
   },
   cancelled: {
-    label: 'Cancelled',
+    label: 'Отменено',
     tone: 'bg-secondary-100 text-secondary-700 border border-secondary-200',
     icon: 'XCircle'
   },
   in_dispute: {
-    label: 'In dispute',
+    label: 'В споре',
     tone: 'bg-error-50 text-error-600 border border-error-200',
     icon: 'AlertTriangle'
   }
@@ -120,24 +120,24 @@ const decorateDeal = (detail, currentUserId) => {
 
   const actions = [];
   if (isSeller && detail.status === 'awaiting_shipment') {
-    actions.push({ id: 'mark_shipped', label: 'Confirm shipment', primary: true });
+    actions.push({ id: 'mark_shipped', label: 'Подтвердить доставку', primary: true });
   }
   if (isBuyer && detail.status === 'awaiting_payment') {
-    actions.push({ id: 'submit_payment', label: 'Pay now', primary: true });
+    actions.push({ id: 'submit_payment', label: 'Оплатить', primary: true });
   }
   if (isSeller && detail.status === 'awaiting_confirmation') {
-    actions.push({ id: 'confirm_delivery', label: 'Confirm payment', primary: true });
+    actions.push({ id: 'confirm_delivery', label: 'Подтвердить платеж', primary: true });
   }
   if (detail.status === 'completed') {
     if (isBuyer && detail.sellerRating == null) {
-      actions.push({ id: 'rate_seller', label: 'Rate seller', primary: true, meta: { target: 'seller' } });
+      actions.push({ id: 'rate_seller', label: 'Оценить продавца', primary: true, meta: { target: 'seller' } });
     }
     if (isSeller && detail.buyerRating == null) {
-      actions.push({ id: 'rate_buyer', label: 'Rate buyer', primary: false, meta: { target: 'buyer' } });
+      actions.push({ id: 'rate_buyer', label: 'Оценить покупателя', primary: false, meta: { target: 'buyer' } });
     }
   }
   if ((isBuyer || isSeller) && !['completed', 'in_dispute'].includes(detail.status)) {
-    actions.push({ id: 'open_dispute', label: 'Open dispute', primary: false });
+    actions.push({ id: 'open_dispute', label: 'Открыть спор', primary: false });
   }
 
   const milestones = Array.isArray(detail.milestones)
@@ -258,8 +258,8 @@ const DealsPage = () => {
       }
       switch (action.id) {
         case 'mark_shipped': {
-          if (window.confirm('Confirm that the goods have been shipped to the buyer?')) {
-            performDealUpdate(() => markDealShipped(deal.detail.id), 'Shipment confirmed.');
+          if (window.confirm('Подтвердить что товары были доставлены покупателю?')) {
+            performDealUpdate(() => markDealShipped(deal.detail.id), 'Доставка подтверждена');
           }
           break;
         }
@@ -287,7 +287,7 @@ const DealsPage = () => {
     if (!dialog?.deal?.detail) return;
     await performDealUpdate(
       () => submitDealPayment(dialog.deal.detail.id),
-      'Payment submitted. Awaiting seller confirmation.'
+      'Оплата произведена. Ждем подтверждения от продавца'
     );
     setDialog(null);
   }, [dialog, performDealUpdate]);
@@ -296,7 +296,7 @@ const DealsPage = () => {
     if (!dialog?.deal?.detail) return;
     await performDealUpdate(
       () => confirmDealCompletion(dialog.deal.detail.id),
-      'Deal marked as completed.'
+      'Сделка завершена успешно.'
     );
     setDialog(null);
   }, [dialog, performDealUpdate]);
@@ -306,7 +306,7 @@ const DealsPage = () => {
       if (!dialog?.deal?.detail) return;
       await performDealUpdate(
         () => openDealDispute(dialog.deal.detail.id, reason),
-        'Dispute created. Our team will review it shortly.'
+        'Спор открыт. Наша команда рассмотрит его в ближайшее время.'
       );
       setDialog(null);
     },
@@ -318,7 +318,7 @@ const DealsPage = () => {
       if (!dialog?.deal?.detail) return;
       await performDealUpdate(
         () => rateDealCounterparty(dialog.deal.detail.id, rating, comment),
-        'Feedback submitted.'
+        'Оценка отправлена. Спасибо за ваш отзыв.'
       );
       setDialog(null);
     },
@@ -360,31 +360,31 @@ const DealsPage = () => {
     return [
       {
         id: 'total',
-        label: 'Total deals',
+        label: 'Всего сделок',
         value: summary.total,
         icon: 'Layers',
-        trend: '+12% vs last month'
+        trend: '+0% в этом месяце'
       },
       {
         id: 'active',
-        label: 'Active',
+        label: 'Активные',
         value: summary.active,
         icon: 'Activity',
-        trend: `${summary.awaiting} awaiting actions`
+        trend: `${summary.awaiting} ожидающих действий`
       },
       {
         id: 'completed',
-        label: 'Completed',
+        label: 'Выполненно',
         value: summary.completed,
         icon: 'CheckCircle',
-        trend: summary.completed > 0 ? 'Great work!' : 'No completed deals yet'
+        trend: summary.completed > 0 ? 'Хорошая работа!' : 'Выполненные сделки отсутствуют'
       },
       {
         id: 'disputes',
-        label: 'Disputes',
+        label: 'Споров открыто',
         value: summary.disputes,
         icon: 'AlertTriangle',
-        trend: summary.disputes > 0 ? 'Action required' : 'All clear'
+        trend: summary.disputes > 0 ? 'Необходимо действие' : 'Все тихо'
       }
     ];
   }, [deals]);
@@ -397,21 +397,21 @@ const DealsPage = () => {
           <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-wide text-text-secondary font-semibold mb-2">
-                Deal center
+                Центр сделок
               </p>
-              <h1 className="text-3xl font-bold text-text-primary">Manage your deals</h1>
+              <h1 className="text-3xl font-bold text-text-primary">Управляйте своими сделками</h1>
               <p className="text-text-secondary mt-2 max-w-2xl">
-                Track ongoing transactions, respond to pending actions and keep everything on schedule for successful deals.
+                Отслеживайте прогресс, управляйте этапами и завершайте сделки с покупателями и продавцами
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <button className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-lg">
                 <Icon name="FileText" size={18} />
-                Export report
+                Скачать отчет
               </button>
               <button className="btn-primary flex items-center gap-2 px-4 py-2 rounded-lg">
                 <Icon name="BellRing" size={18} />
-                Deal alerts
+                Уведомления о сделках
               </button>
             </div>
           </header>
@@ -433,7 +433,7 @@ const DealsPage = () => {
                 onClick={() => setBanner(null)}
                 className="text-xs font-medium uppercase tracking-wide"
               >
-                Dismiss
+                Закрыть
               </button>
             </div>
           )}
@@ -474,7 +474,7 @@ const DealsPage = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-sm text-text-secondary">View</span>
+                <span className="text-sm text-text-secondary">Вид</span>
                 <div className="flex rounded-lg border border-border overflow-hidden">
                   <button
                     className={`px-3 py-2 flex items-center gap-2 text-sm ${
@@ -482,8 +482,8 @@ const DealsPage = () => {
                     }`}
                     onClick={() => setViewMode('list')}
                   >
-                    <Icon name="Rows" size={18} />
-                    List
+                    <Icon name="List" size={18} />
+                    Список
                   </button>
                   <button
                     className={`px-3 py-2 flex items-center gap-2 text-sm ${
@@ -492,7 +492,7 @@ const DealsPage = () => {
                     onClick={() => setViewMode('grid')}
                   >
                     <Icon name="Grid" size={18} />
-                    Grid
+                    Сетка
                   </button>
                 </div>
               </div>
@@ -505,9 +505,9 @@ const DealsPage = () => {
                 <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-6">
                   <Icon name="Loader2" size={28} className="animate-spin text-text-secondary" />
                 </div>
-                <h2 className="text-xl font-semibold text-text-primary mb-2">Loading deals...</h2>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Загружаем сделки...</h2>
                 <p className="text-text-secondary max-w-md mx-auto">
-                  Fetching the latest transactions and milestones.
+                  Пожалуйста, подождите немного, пока мы получаем ваши текущие сделки.
                 </p>
               </div>
             ) : error ? (
@@ -515,7 +515,7 @@ const DealsPage = () => {
                 <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-6 text-error-600">
                   <Icon name="AlertTriangle" size={28} />
                 </div>
-                <h2 className="text-xl font-semibold text-error-700 mb-2">Failed to load deals</h2>
+                <h2 className="text-xl font-semibold text-error-700 mb-2">Не удалось загрузить сделки</h2>
                 <p className="text-error-600 max-w-md mx-auto">{error}</p>
               </div>
             ) : filteredDeals.length === 0 ? (
@@ -523,9 +523,9 @@ const DealsPage = () => {
                 <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-6">
                   <Icon name="Inbox" size={28} className="text-text-secondary" />
                 </div>
-                <h2 className="text-xl font-semibold text-text-primary mb-2">No deals in this view yet</h2>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Пока сделок нет</h2>
                 <p className="text-text-secondary max-w-md mx-auto">
-                  When you accept offers, they will appear here. Use filters to review completed deals or disputes.
+                  Принятые вами предложения будут отображаться здесь. Используйте фильтры для просмотра завершённых сделок или споров.
                 </p>
               </div>
             ) : (
@@ -597,7 +597,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones, onAction, action
                 {status.label}
               </span>
             </div>
-            <p className="text-sm text-text-secondary">Linked lot: {deal.lotTitle}</p>
+            <p className="text-sm text-text-secondary">Связанные лот: {deal.lotTitle}</p>
           </div>
 
           <div className="text-right">
@@ -617,7 +617,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones, onAction, action
               <Icon name="MessageSquare" size={18} />
             </div>
             <div>
-              <p className="text-sm font-medium text-text-primary">Latest update</p>
+              <p className="text-sm font-medium text-text-primary">Последние обновления:</p>
               <p className="text-sm text-text-secondary">{deal.lastMessage.text}</p>
               <p className="text-xs text-text-secondary mt-1">{deal.lastMessage.time}</p>
             </div>
@@ -650,7 +650,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones, onAction, action
         {isExpanded && showMilestones && deal.milestones.length > 0 && (
           <section className="mt-4">
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide mb-3">
-              Milestones
+              Эатпы сделки
             </h3>
             <div className="space-y-3">
               {deal.milestones.map((milestone, index) => (
@@ -679,7 +679,7 @@ const DealCard = ({ deal, onToggle, isExpanded, showMilestones, onAction, action
         )}
         {deal.status === 'in_dispute' && deal.disputeReason && (
           <section className="mt-4 p-4 border border-error-200 bg-error-50 rounded-lg">
-            <p className="text-sm font-semibold text-error-700">Dispute</p>
+            <p className="text-sm font-semibold text-error-700">Спор</p>
             <p className="text-sm text-error-600 mt-1">{deal.disputeReason}</p>
           </section>
         )}
@@ -735,40 +735,40 @@ const PaymentDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
   return (
     <ModalContainer open={open} title="Mock payment" onClose={onClose}>
       <p className="text-sm text-text-secondary">
-        Payments are simulated in this environment. Provide any card details to mark the invoice as paid.
+        Симуляция процесса оплаты
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Name on card</label>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Владелец карты</label>
           <input
             type="text"
             value={form.name}
             onChange={handleChange('name')}
             className="input-field"
-            placeholder="John Doe"
+            placeholder="Иван Иванов"
             required
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Card number</label>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Номер карты</label>
           <input
             type="text"
             value={form.number}
             onChange={handleChange('number')}
             className="input-field"
-            placeholder="0000 0000 0000 0000"
+            placeholder="1234 5678 9012 3456"
             required
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Expiry</label>
+            <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Срок действия</label>
             <input
               type="text"
               value={form.expiry}
               onChange={handleChange('expiry')}
               className="input-field"
-              placeholder="MM/YY"
+              placeholder="ММ/ГГ"
               required
             />
           </div>
@@ -786,14 +786,14 @@ const PaymentDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
         </div>
         <div className="flex justify-end gap-3 pt-2">
           <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
-            Cancel
+            Оменить
           </button>
           <button
             type="submit"
             className="btn-primary px-4 py-2 rounded-lg text-sm"
             disabled={submitting}
           >
-            {submitting ? 'Processing...' : 'Submit payment'}
+            {submitting ? 'В процессе...' : 'Подтвердить оплату'}
           </button>
         </div>
       </form>
@@ -802,14 +802,14 @@ const PaymentDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
 };
 
 const ConfirmDialog = ({ open, deal, submitting, onClose, onConfirm }) => (
-  <ModalContainer open={open} title="Confirm payment received" onClose={onClose}>
+  <ModalContainer open={open} title="Оплата получена" onClose={onClose}>
     <p className="text-sm text-text-secondary">
-      Confirm that you have delivered the goods and received payment from {deal?.buyer?.name ?? 'the buyer'}.
-      You can leave feedback after completion.
+      Подтвердите, что вы доставили товар и получили оплату от {deal?.buyer?.name ?? 'the buyer'}.
+      Вы можете оставить отзыв после завершения
     </p>
     <div className="flex justify-end gap-3 pt-2">
       <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
-        Cancel
+        Отменить
       </button>
       <button
         type="button"
@@ -834,14 +834,14 @@ const DisputeDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit?.(reason.trim() || 'Dispute opened');
+    onSubmit?.(reason.trim() || 'Спор открыт');
   };
 
   return (
     <ModalContainer open={open} title="Open dispute" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-text-secondary">
-          Describe what went wrong. Our team will review the dispute and reach out to both parties.
+          Опишите, что пошло не так. Наша команда рассмотрит спор и свяжется с обеими сторонами
         </p>
         <textarea
           value={reason}
@@ -859,7 +859,7 @@ const DisputeDialog = ({ open, deal, submitting, onClose, onSubmit }) => {
             className="btn-primary px-4 py-2 rounded-lg text-sm"
             disabled={submitting}
           >
-            {submitting ? 'Submitting...' : 'Create dispute'}
+            {submitting ? 'Подтверждаем...' : 'Открыть спор'}
           </button>
         </div>
       </form>
@@ -890,10 +890,10 @@ const RatingDialog = ({ open, deal, target = 'seller', submitting, onClose, onSu
     <ModalContainer open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-text-secondary">
-          Share feedback about {label}. Ratings help build trust on the marketplace.
+          Поделитесь отзывом о товаре {label}. Рейтинги помогают укрепить доверие на рынке.
         </p>
         <div>
-          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Rating</label>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Рейтинг</label>
           <select
             value={rating}
             onChange={(event) => setRating(Number(event.target.value))}
@@ -907,17 +907,17 @@ const RatingDialog = ({ open, deal, target = 'seller', submitting, onClose, onSu
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Comment (optional)</label>
+          <label className="block text-xs font-medium text-text-secondary uppercase mb-2">Комментарий (необязательно)</label>
           <textarea
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             className="input-field min-h-[100px]"
-            placeholder="Add helpful context for future trades"
+            placeholder="Добавьте полезный контекст для будущих сделок"
           />
         </div>
         <div className="flex justify-end gap-3">
           <button type="button" onClick={onClose} className="btn-secondary px-4 py-2 rounded-lg text-sm">
-            Cancel
+            Отменить
           </button>
           <button
             type="submit"

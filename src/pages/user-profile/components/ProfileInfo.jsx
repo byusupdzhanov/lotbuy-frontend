@@ -30,15 +30,15 @@ const ProfileInfo = ({ profile, stats, activeLots = [], saving, onSave, onUpload
     <div className="bg-surface border border-border rounded-xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-text-primary">Profile information</h2>
+          <h2 className="text-2xl font-semibold text-text-primary">Информация о профиле</h2>
           <p className="text-sm text-text-secondary mt-1">
-            Update the information other users will see on the marketplace.
+            Обновите информацию, которую другие пользователи увидят на вашем профиле.
           </p>
         </div>
         <div className="flex items-center space-x-3">
           <label className="btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 cursor-pointer">
             <Icon name="Camera" size={16} />
-            <span>Change photo</span>
+            <span>Изменить фото</span>
             <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           </label>
         </div>
@@ -59,60 +59,60 @@ const ProfileInfo = ({ profile, stats, activeLots = [], saving, onSave, onUpload
           </div>
           <div className="flex items-center space-x-2">
             <Icon name="User" size={16} />
-            <span>Joined {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'recently'}</span>
+            <span>Присоединился {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'недавно'}</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
-          <p className="text-xs uppercase tracking-wide text-text-secondary">Active Lots</p>
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Активных лотов</p>
           <p className="text-2xl font-semibold text-text-primary">{stats?.activeLots ?? 0}</p>
         </div>
         <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
-          <p className="text-xs uppercase tracking-wide text-text-secondary">Pending Offers</p>
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Полученных предложений</p>
           <p className="text-2xl font-semibold text-text-primary">{stats?.pendingOffers ?? 0}</p>
         </div>
         <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
-          <p className="text-xs uppercase tracking-wide text-text-secondary">Completed Deals</p>
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Выполненных сделок</p>
           <p className="text-2xl font-semibold text-text-primary">{stats?.completedDeals ?? 0}</p>
         </div>
         <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100 text-center">
-          <p className="text-xs uppercase tracking-wide text-text-secondary">Offers Made</p>
+          <p className="text-xs uppercase tracking-wide text-text-secondary">Предложений сделано</p>
           <p className="text-2xl font-semibold text-text-primary">{stats?.offersMade ?? 0}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">Full name *</label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Полное имя *</label>
           <input
             type="text"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
             className="input-field"
-            placeholder="Your full name"
+            placeholder="Полное имя"
           />
           {error && <p className="text-xs text-error-500 mt-1">{error}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">Email</label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Почта</label>
           <input type="email" value={profile?.email || ''} disabled className="input-field bg-secondary-50" />
-          <p className="text-xs text-text-secondary mt-1">Email address cannot be changed at this time.</p>
+          <p className="text-xs text-text-secondary mt-1">Упс, почту пока не получится поменять</p>
         </div>
 
         <div className="flex items-center justify-end space-x-3">
           <button type="submit" disabled={saving} className="btn-primary px-5 py-2 rounded-lg text-sm font-medium">
-            {saving ? 'Saving...' : 'Save changes'}
+            {saving ? 'Saving...' : 'Сохранить изменения'}
           </button>
         </div>
       </form>
 
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-text-primary">Recent lots</h3>
+        <h3 className="text-lg font-semibold text-text-primary">Недавное лоты</h3>
         {activeLots.length === 0 ? (
-          <p className="text-sm text-text-secondary">You have not created any lots yet.</p>
+          <p className="text-sm text-text-secondary">Вы еще не создали никаких лотов</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {activeLots.slice(0, 3).map((lot) => (

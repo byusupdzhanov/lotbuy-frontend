@@ -48,31 +48,31 @@ const CreateLot = () => {
   const [dragActive, setDragActive] = useState(false);
 
   const categories = [
-    { value: 'electronics', label: 'Electronics & Gadgets', icon: 'Smartphone' },
-    { value: 'furniture', label: 'Furniture & Home', icon: 'Home' },
-    { value: 'vehicles', label: 'Vehicles & Parts', icon: 'Car' },
-    { value: 'fashion', label: 'Fashion & Accessories', icon: 'Shirt' },
-    { value: 'books', label: 'Books & Media', icon: 'Book' },
-    { value: 'sports', label: 'Sports & Outdoors', icon: 'Dumbbell' },
-    { value: 'tools', label: 'Tools & Equipment', icon: 'Wrench' },
-    { value: 'collectibles', label: 'Collectibles & Art', icon: 'Palette' },
-    { value: 'services', label: 'Services', icon: 'Users' },
-    { value: 'other', label: 'Other', icon: 'Package' }
+    { value: 'electronics', label: 'Электроника и Гаджеты', icon: 'Smartphone' },
+    { value: 'furniture', label: 'Фурнита и Дом', icon: 'Home' },
+    { value: 'vehicles', label: 'Автомобили и Запчасти', icon: 'Car' },
+    { value: 'fashion', label: 'Мода и Аксессуары', icon: 'Shirt' },
+    { value: 'books', label: 'Книги и Медиа', icon: 'Book' },
+    { value: 'sports', label: 'Спорт', icon: 'Dumbbell' },
+    { value: 'tools', label: 'Инструменты и Оборудование', icon: 'Wrench' },
+    { value: 'collectibles', label: 'Коллекции и Искусство', icon: 'Palette' },
+    { value: 'services', label: 'Услуги', icon: 'Users' },
+    { value: 'other', label: 'Прочее', icon: 'Package' }
   ];
 
   const conditions = [
-    { value: 'new', label: 'Brand New', description: 'Never used, in original packaging' },
-    { value: 'like-new', label: 'Like New', description: 'Barely used, excellent condition' },
-    { value: 'good', label: 'Good', description: 'Used but well maintained' },
-    { value: 'fair', label: 'Fair', description: 'Shows wear but functional' },
-    { value: 'any', label: 'Any Condition', description: 'Open to all conditions' }
+    { value: 'new', label: 'Новое', description: 'Не был в использовании' },
+    { value: 'like-new', label: 'Как новое', description: 'Небольшой срок эксплуатации' },
+    { value: 'good', label: 'Хорошее', description: 'Срок эксплуатации более 3 мес.' },
+    { value: 'fair', label: 'Нормальное', description: 'Был в использовании более 6 мес.' },
+    { value: 'any', label: 'Любое состояние', description: 'Состояние неважно' }
   ];
 
   const steps = [
-    { id: 1, title: 'Basic Info', description: 'Title, description, category' },
-    { id: 2, title: 'Budget & Details', description: 'Price range, condition, location' },
-    { id: 3, title: 'Images & Media', description: 'Upload photos and videos' },
-    { id: 4, title: 'Advanced Options', description: 'Duration, requirements, settings' }
+    { id: 1, title: 'Основная информация', description: 'Название, описание, категория' },
+    { id: 2, title: 'Бюджет и детали', description: 'Диапазон цены, состояние, местоположение' },
+    { id: 3, title: 'Изображения и медиа', description: 'Загрузить изображения/медиа' },
+    { id: 4, title: 'Прочие опции', description: 'Настройки' }
   ];
 
   useEffect(() => {
@@ -298,23 +298,23 @@ const CreateLot = () => {
 
     switch (step) {
       case 1:
-        if (!formData.title.trim()) newErrors.title = 'Title is required';
-        if (!formData.description.trim()) newErrors.description = 'Description is required';
-        if (!formData.category) newErrors.category = 'Category is required';
+        if (!formData.title.trim()) newErrors.title = 'Название обязательно';
+        if (!formData.description.trim()) newErrors.description = 'Описание обязательно';
+        if (!formData.category) newErrors.category = 'Категория обязательна';
         break;
       case 2:
         if (formData.budgetMin >= formData.budgetMax) {
-          newErrors.budget = 'Minimum budget must be less than maximum';
+          newErrors.budget = 'Минимальная сумма должна быть меньше максимальной';
         }
-        if (!formData.condition) newErrors.condition = 'Condition preference is required';
-        if (!formData.location.trim()) newErrors.location = 'Location is required';
+        if (!formData.condition) newErrors.condition = 'Состояние обязательно';
+        if (!formData.location.trim()) newErrors.location = 'Местоположение обязательно';
         break;
       case 3:
         // Images are optional, no validation needed
         break;
       case 4:
         if (formData.duration < 1 || formData.duration > 30) {
-          newErrors.duration = 'Duration must be between 1 and 30 days';
+          newErrors.duration = 'Продолжительность должна быть от 1 до 30 дней';
         }
         break;
     }
@@ -363,7 +363,7 @@ const CreateLot = () => {
     if (formData.images.some((image) => image.uploading)) {
       setErrors((prev) => ({
         ...prev,
-        submit: 'Please wait for the image upload to finish before publishing.',
+        submit: 'Пожалуйста дождитесь завершения загрузки изображений перед публикацией лота.',
       }));
       return;
     }
@@ -419,7 +419,7 @@ const CreateLot = () => {
       if (targetId) {
         navigate(`/lot-details-offers?id=${targetId}`, {
           state: {
-            message: requestId ? 'Lot updated successfully.' : 'Lot published successfully! Sellers can now make offers.',
+            message: requestId ? 'Лот успешно обновлен' : 'Лот успешно опубликован. Осталось дождаться предложений от продавцов!',
             type: 'success',
           },
         });
@@ -427,7 +427,7 @@ const CreateLot = () => {
         navigate('/browse-lots');
       }
     } catch (error) {
-      const message = error instanceof APIError ? error.message : 'Failed to publish lot. Please try again.';
+      const message = error instanceof APIError ? error.message : 'Не получилось опубликовать лот. Пожалуйста попробуйте еще раз';
       setErrors({ submit: message });
     } finally {
       setIsPublishing(false);
@@ -436,7 +436,7 @@ const CreateLot = () => {
 
   const handleDeleteLot = async () => {
     if (!requestId) return;
-    if (!window.confirm('Are you sure you want to delete this lot? This action cannot be undone.')) {
+    if (!window.confirm('Вы уверены, что хотите удалить этот лот? Это действие нельзя будет отменить.')) {
       return;
     }
 
@@ -447,12 +447,12 @@ const CreateLot = () => {
       navigate('/browse-lots', {
         replace: true,
         state: {
-          message: 'Lot deleted successfully.',
+          message: 'Лот успешно удален',
           type: 'success',
         },
       });
     } catch (error) {
-      const message = error instanceof APIError ? error.message : 'Failed to delete lot. Please try again.';
+      const message = error instanceof APIError ? error.message : 'Не удалось удалить лот. Пожалуйста попробуйте еще раз';
       setErrors((prev) => ({ ...prev, submit: message }));
     } finally {
       setIsDeleting(false);
@@ -466,7 +466,7 @@ const CreateLot = () => {
         <div className="pt-16">
           <div className="container mx-auto px-4 py-20 text-center text-text-secondary">
             <Icon name="Loader2" size={36} className="animate-spin mx-auto mb-4" />
-            <p className="text-sm">Loading lot details...</p>
+            <p className="text-sm">Загружаем детали ...</p>
           </div>
         </div>
       </div>
@@ -481,7 +481,7 @@ const CreateLot = () => {
             {/* Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-text-primary mb-2">
-                What are you looking for? *
+                Что вы ищете? *
               </label>
               <input
                 type="text"
@@ -489,42 +489,42 @@ const CreateLot = () => {
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 className={`input-field w-full ${errors.title ? 'border-error-500 focus:ring-error-500' : ''}`}
-                placeholder="e.g., iPhone 15 Pro Max 256GB"
+                placeholder="например, ищу MacBook Pro 16' 2025 M4 Max"
                 maxLength={100}
               />
               {errors.title && (
                 <p className="text-error-500 text-xs mt-1">{errors.title}</p>
               )}
               <p className="text-text-secondary text-xs mt-1">
-                {formData.title.length}/100 characters
+                {formData.title.length}/100 символов
               </p>
             </div>
 
             {/* Description */}
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-text-primary mb-2">
-                Detailed Description *
+                Детальное описание *
               </label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 className={`input-field w-full h-32 resize-none ${errors.description ? 'border-error-500 focus:ring-error-500' : ''}`}
-                placeholder="Describe exactly what you're looking for, including specific features, brand preferences, and any other requirements..."
+                placeholder="Опишите точно, что вы ищете, включая конкретные характеристики, предпочтения бренда и любые другие требования..."
                 maxLength={1000}
               />
               {errors.description && (
                 <p className="text-error-500 text-xs mt-1">{errors.description}</p>
               )}
               <p className="text-text-secondary text-xs mt-1">
-                {formData.description.length}/1000 characters
+                {formData.description.length}/1000 символов
               </p>
             </div>
 
             {/* Category */}
             <div>
               <label htmlFor="category" className="block text-sm font-medium text-text-primary mb-2">
-                Category *
+                Категория *
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {categories.map((category) => (
@@ -557,12 +557,12 @@ const CreateLot = () => {
             {/* Budget Range */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-4">
-                Budget Range *
+                Бюджет *
               </label>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <label htmlFor="currency" className="text-xs text-text-secondary uppercase tracking-wide">
-                    Currency
+                    Валюта
                   </label>
                   <select
                     id="currency"
@@ -579,7 +579,7 @@ const CreateLot = () => {
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
-                    <label className="block text-xs text-text-secondary mb-1">Minimum</label>
+                    <label className="block text-xs text-text-secondary mb-1">Минимум</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">
                         {formData.currency}
@@ -594,7 +594,7 @@ const CreateLot = () => {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-xs text-text-secondary mb-1">Maximum</label>
+                    <label className="block text-xs text-text-secondary mb-1">Максимум</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">
                         {formData.currency}
@@ -618,7 +618,7 @@ const CreateLot = () => {
             {/* Condition */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-3">
-                Preferred Condition *
+                Желаемое состояние *
               </label>
               <div className="space-y-2">
                 {conditions.map((condition) => (
@@ -652,7 +652,7 @@ const CreateLot = () => {
             {/* Location */}
             <div>
               <label htmlFor="location" className="block text-sm font-medium text-text-primary mb-2">
-                Location *
+                Местоположение *
               </label>
               <div className="relative">
                 <Icon name="MapPin" size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
@@ -662,7 +662,7 @@ const CreateLot = () => {
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   className={`input-field w-full pl-10 ${errors.location ? 'border-error-500 focus:ring-error-500' : ''}`}
-                  placeholder="City, State or ZIP code"
+                  placeholder="Город, Область"
                 />
               </div>
               {errors.location && (
@@ -678,7 +678,7 @@ const CreateLot = () => {
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-3">
-                Images (Optional)
+                Изображения (Необязательно)
               </label>
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
@@ -691,17 +691,17 @@ const CreateLot = () => {
               >
                 <Icon name="Upload" size={48} className="text-secondary-400 mx-auto mb-4" />
                 <p className="text-text-primary font-medium mb-2">
-                  Drag and drop images here, or click to browse
+                  Перенесите и отпустите изображение сюда, или
                 </p>
                 <p className="text-text-secondary text-sm mb-4">
-                  Upload a primary image (JPG, PNG, GIF up to 5MB)
+                  Загрузите изображения в форматах JPG, PNG. Максимальный размер файла: 5 МБ.
                 </p>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="btn-primary px-6 py-2 rounded-lg"
                 >
-                  Choose Files
+                  Выбрать изображение
                 </button>
                 <input
                   ref={fileInputRef}
@@ -717,7 +717,7 @@ const CreateLot = () => {
             {formData.images.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-text-primary mb-3">
-                  Uploaded Image
+                  Загруженные изображения
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {formData.images.map((image) => (
@@ -730,7 +730,7 @@ const CreateLot = () => {
                         />
                         {image.uploading && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs">
-                            Uploading...
+                            Загрузка...
                           </div>
                         )}
                       </div>
@@ -766,7 +766,7 @@ const CreateLot = () => {
             {/* Duration */}
             <div>
               <label htmlFor="duration" className="block text-sm font-medium text-text-primary mb-2">
-                Lot Duration
+                Продолжительность лота (в днях) *
               </label>
               <div className="flex items-center space-x-4">
                 <input
@@ -786,17 +786,17 @@ const CreateLot = () => {
                 <p className="text-error-500 text-xs mt-1">{errors.duration}</p>
               )}
               <p className="text-text-secondary text-xs mt-1">
-                How long should sellers be able to make offers?
+                Как долго лот будет активен и принимать предложения от продавцов
               </p>
             </div>
 
             {/* Auto-accept threshold */}
             <div>
               <label htmlFor="autoAccept" className="block text-sm font-medium text-text-primary mb-2">
-                Auto-accept Threshold (Optional)
+                Сумма авто-принятия (Необязательно)
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary">$</span>
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary"></span>
                 <input
                   type="number"
                   id="autoAccept"
@@ -808,14 +808,14 @@ const CreateLot = () => {
                 />
               </div>
               <p className="text-text-secondary text-xs mt-1">
-                Automatically accept offers at or below this price (0 = disabled)
+                АВто-принятие предложений от продавцов, если их цена не превышает эту сумму.
               </p>
             </div>
 
             {/* Seller Requirements */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-3">
-                Seller Requirements
+                Требования к продавцам
               </label>
               <div className="space-y-3">
                 <label className="flex items-center space-x-3">
@@ -825,7 +825,7 @@ const CreateLot = () => {
                     onChange={(e) => handleNestedInputChange('sellerRequirements', 'verifiedOnly', e.target.checked)}
                     className="rounded border-border text-primary focus:ring-primary-500"
                   />
-                  <span className="text-sm text-text-primary">Verified sellers only</span>
+                  <span className="text-sm text-text-primary">Только проверенные продавцы</span>
                 </label>
                 <label className="flex items-center space-x-3">
                   <input
@@ -834,19 +834,19 @@ const CreateLot = () => {
                     onChange={(e) => handleNestedInputChange('sellerRequirements', 'businessSellers', e.target.checked)}
                     className="rounded border-border text-primary focus:ring-primary-500"
                   />
-                  <span className="text-sm text-text-primary">Allow business sellers</span>
+                  <span className="text-sm text-text-primary">Показывать бизнес-продавцам</span>
                 </label>
                 <div className="flex items-center space-x-3">
-                  <label className="text-sm text-text-primary">Minimum seller rating:</label>
+                  <label className="text-sm text-text-primary">Минимальный рейтинг продавца:</label>
                   <select
                     value={formData.sellerRequirements.minRating}
                     onChange={(e) => handleNestedInputChange('sellerRequirements', 'minRating', parseInt(e.target.value))}
                     className="input-field"
                   >
-                    <option value={0}>No requirement</option>
-                    <option value={3}>3+ stars</option>
-                    <option value={4}>4+ stars</option>
-                    <option value={5}>5 stars only</option>
+                    <option value={0}>Нет рейтинга</option>
+                    <option value={3}>3+ звезд</option>
+                    <option value={4}>4+ звезд</option>
+                    <option value={5}>Только 5 звезд</option>
                   </select>
                 </div>
               </div>
@@ -865,13 +865,13 @@ const CreateLot = () => {
 
     return (
       <div className="bg-surface rounded-lg border border-border p-6">
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Preview</h3>
+        <h3 className="text-lg font-semibold text-text-primary mb-4">Предпросмотр</h3>
         
         <div className="space-y-4">
           {/* Title */}
           <div>
             <h4 className="text-xl font-semibold text-text-primary">
-              {formData.title || 'Your lot title will appear here'}
+              {formData.title || 'Название лота появится здесь'}
             </h4>
             {selectedCategory && (
               <div className="flex items-center space-x-2 mt-2">
@@ -894,7 +894,7 @@ const CreateLot = () => {
           {/* Description */}
           <div>
             <p className="text-text-secondary">
-              {formData.description || 'Your detailed description will appear here...'}
+              {formData.description || 'Ваше описание лота появится здесь'}
             </p>
           </div>
 
@@ -902,13 +902,13 @@ const CreateLot = () => {
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
             {selectedCondition && (
               <div>
-                <span className="text-xs text-text-secondary">Condition</span>
+                <span className="text-xs text-text-secondary">Состояние</span>
                 <p className="text-sm font-medium text-text-primary">{selectedCondition.label}</p>
               </div>
             )}
             {formData.location && (
               <div>
-                <span className="text-xs text-text-secondary">Location</span>
+                <span className="text-xs text-text-secondary">Местоположение</span>
                 <p className="text-sm font-medium text-text-primary">{formData.location}</p>
               </div>
             )}
@@ -917,7 +917,7 @@ const CreateLot = () => {
           {/* Images */}
           {(formData.images.length > 0 || primaryImageUrl) && (
             <div>
-              <span className="text-xs text-text-secondary">Images</span>
+              <span className="text-xs text-text-secondary">Изображения</span>
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {formData.images.slice(0, 3).map((image) => (
                   <div key={image.id} className="aspect-square rounded overflow-hidden bg-secondary-100">
@@ -966,9 +966,9 @@ const CreateLot = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-text-primary">Create New Lot</h1>
+                <h1 className="text-3xl font-bold text-text-primary">Создать новый лот</h1>
                 <p className="text-text-secondary mt-1">
-                  Tell sellers what you're looking for and receive competitive offers
+                  Распишите, что вы ищете, чтобы получить лучшие предложения от продавцов.
                 </p>
               </div>
               
@@ -986,7 +986,7 @@ const CreateLot = () => {
                   className="hidden lg:flex items-center space-x-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-secondary-50 transition-colors duration-200"
                 >
                   <Icon name="Eye" size={16} />
-                  <span>{isPreviewMode ? 'Hide Preview' : 'Show Preview'}</span>
+                  <span>{isPreviewMode ? 'Скрыть' : 'Предпросмотр'}</span>
                 </button>
               </div>
             </div>
@@ -1046,7 +1046,7 @@ const CreateLot = () => {
                       className="flex items-center space-x-2 px-4 py-2 text-text-secondary hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
                       <Icon name="ChevronLeft" size={16} />
-                      <span>Previous</span>
+                      <span>Назад</span>
                     </button>
 
                     <div className="flex items-center space-x-3">
@@ -1056,7 +1056,7 @@ const CreateLot = () => {
                           onClick={handleNextStep}
                           className="btn-primary px-6 py-2 rounded-lg flex items-center space-x-2"
                         >
-                          <span>Next</span>
+                          <span>Дальше</span>
                           <Icon name="ChevronRight" size={16} />
                         </button>
                       ) : (
@@ -1071,12 +1071,12 @@ const CreateLot = () => {
                               {isDeleting ? (
                                 <>
                                   <Icon name="Loader2" size={16} className="animate-spin" />
-                                  <span>Deleting...</span>
+                                  <span>Удаление...</span>
                                 </>
                               ) : (
                                 <>
                                   <Icon name="Trash" size={16} />
-                                  <span>Delete Lot</span>
+                                  <span>Удалить лот</span>
                                 </>
                               )}
                             </button>
@@ -1090,12 +1090,12 @@ const CreateLot = () => {
                             {isPublishing ? (
                               <>
                                 <Icon name="Loader2" size={16} className="animate-spin" />
-                                <span>Publishing...</span>
+                                <span>Публикация...</span>
                               </>
                             ) : (
                               <>
                                 <Icon name="Send" size={16} />
-                                <span>Publish Lot</span>
+                                <span>Опубликовать лот</span>
                               </>
                             )}
                           </button>
@@ -1122,7 +1122,7 @@ const CreateLot = () => {
               className="w-full flex items-center justify-center space-x-2 px-4 py-3 border border-border rounded-lg hover:bg-secondary-50 transition-colors duration-200 mb-4"
             >
               <Icon name="Eye" size={18} />
-              <span>{isPreviewMode ? 'Hide Preview' : 'Show Preview'}</span>
+              <span>{isPreviewMode ? 'Скрыть' : 'Предпросмотр'}</span>
             </button>
             
             {isPreviewMode && renderPreview()}

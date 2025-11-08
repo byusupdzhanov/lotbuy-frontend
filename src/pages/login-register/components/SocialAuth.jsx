@@ -14,9 +14,9 @@ const SocialAuth = ({ onSuccess }) => {
     },
     {
       id: 'facebook',
-      name: 'Facebook',
-      icon: 'Facebook',
-      color: 'text-blue-600',
+      name: 'Github',
+      icon: 'Github',
+      color: 'text-black',
       bgColor: 'hover:bg-blue-50'
     }
   ];
@@ -64,7 +64,7 @@ const SocialAuth = ({ onSuccess }) => {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-surface text-text-secondary">Or continue with</span>
+          <span className="px-2 bg-surface text-text-secondary">Или войти с</span>
         </div>
       </div>
 
@@ -97,9 +97,9 @@ const SocialAuth = ({ onSuccess }) => {
         <div className="flex items-start space-x-3">
           <Icon name="Shield" size={16} className="text-primary mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-text-primary">Secure & Fast</p>
+            <p className="text-sm font-medium text-text-primary">Быстро и безопасно</p>
             <p className="text-xs text-text-secondary mt-1">
-              Your social accounts are used only for secure authentication. We never post on your behalf.
+              Ваши аккаунты в социальных сетях используются только для безопасной аутентификации. Мы никогда не публикуем информацию от вашего имени.
             </p>
           </div>
         </div>

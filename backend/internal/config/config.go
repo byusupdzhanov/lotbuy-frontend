@@ -16,7 +16,7 @@ func Load() (Config, error) {
 
 	httpAddr := os.Getenv("LOTBUY_HTTP_ADDR")
 	if httpAddr == "" {
-		httpAddr = ":8080"
+		httpAddr = ":8090"
 	}
 	cfg.HTTPAddr = httpAddr
 

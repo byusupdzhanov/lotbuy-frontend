@@ -27,21 +27,21 @@ const Settings = () => {
       <div className="card p-6">
         <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center space-x-2">
           <Icon name="Bell" size={18} />
-          <span>Notifications</span>
+          <span>Уведомления</span>
         </h3>
         <div className="space-y-3">
           {[{
             key: 'emailOffers',
-            label: 'Email me when someone makes an offer on my lot',
+            label: 'Уведомлять меня по почте о новых предложениях',
           }, {
             key: 'emailMessages',
-            label: 'Email me when I receive a new message',
+            label: 'Уведомлять меня по почте о новых сообщениях',
           }, {
             key: 'pushOffers',
-            label: 'Send push notifications for offers',
+            label: 'Отправлять push-уведомления о новых предложениях',
           }, {
             key: 'pushMessages',
-            label: 'Send push notifications for messages',
+            label: 'Отправлять push-уведомления о новых сообщениях',
           }].map(({ key, label }) => (
             <label key={key} className="flex items-center justify-between text-sm text-text-secondary">
               <span>{label}</span>
@@ -59,11 +59,11 @@ const Settings = () => {
       <div className="card p-6">
         <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center space-x-2">
           <Icon name="Shield" size={18} />
-          <span>Privacy</span>
+          <span>Безопасность</span>
         </h3>
         <div className="space-y-3 text-sm text-text-secondary">
           <label className="flex items-center justify-between">
-            <span>Make my profile visible to other users</span>
+            <span>Сделать мой профиль открытом для других пользователей</span>
             <input
               type="checkbox"
               checked={privacy.profileVisibility === 'public'}
@@ -75,7 +75,7 @@ const Settings = () => {
             />
           </label>
           <label className="flex items-center justify-between">
-            <span>Show my city on lots I create</span>
+            <span>Отображать город</span>
             <input
               type="checkbox"
               checked={privacy.showLocation}
@@ -84,7 +84,7 @@ const Settings = () => {
             />
           </label>
           <label className="flex items-center justify-between">
-            <span>Show email on profile</span>
+            <span>Отображать почту в профиле</span>
             <input
               type="checkbox"
               checked={privacy.showEmail}

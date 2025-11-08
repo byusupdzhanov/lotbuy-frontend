@@ -8,40 +8,40 @@ const QuickStats = ({ stats = {} }) => {
   const statsConfig = [
     {
       key: 'activeLots',
-      label: 'Active Lots',
+      label: 'Активные лоты',
       icon: 'Package',
       color: 'text-primary',
       bgColor: 'bg-primary-50',
-      description: 'Lots accepting offers',
+      description: 'Лоты, получающие предложения',
       onClick: () => navigate('/browse-lots')
     },
     {
       key: 'pendingOffers',
-      label: 'Pending Offers',
+      label: 'Полученные предложения',
       icon: 'DollarSign',
       color: 'text-success-500',
       bgColor: 'bg-success-50',
-      description: 'Offers to review',
+      description: 'Предложения от продавцов',
       onClick: () => navigate('/dashboard-home')
     },
     {
       key: 'ongoingDeals',
       fallbackKey: 'activeDeals',
-      label: 'Ongoing Deals',
+      label: 'Текущие сделки',
       icon: 'Handshake',
       color: 'text-accent-500',
       bgColor: 'bg-accent-50',
-      description: 'Deals in progress',
+      description: 'Сделки в процессе',
       onClick: () => navigate('/deals')
     },
     {
       key: 'unreadMessages',
       fallbackKey: 'incomingMessages',
-      label: 'Recent Messages',
+      label: 'Непрочитанные сообщения',
       icon: 'MessageCircle',
       color: 'text-warning-500',
       bgColor: 'bg-warning-50',
-      description: 'New conversations',
+      description: 'Сообщения от продавцов',
       onClick: () => navigate('/lot-details-offers')
     }
   ];

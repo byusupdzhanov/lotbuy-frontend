@@ -30,15 +30,15 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'вы точно ввели почту?';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'Пожалуста, введите корректный email';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'кажется, вы забыли ввести пароль';
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = 'Пароль должен содержать не менее 8 символов';
     }
 
     setErrors(newErrors);
@@ -102,7 +102,7 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
       {/* Email Field */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
-          Email Address
+          Почта
         </label>
         <div className="relative">
           <input
@@ -112,7 +112,7 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
             value={formData.email}
             onChange={handleInputChange}
             className={`input-field w-full pl-10 ${errors.email ? 'border-error-500 focus:ring-error-500' : ''}`}
-            placeholder="Enter your email"
+            placeholder="Введите вашу почту"
             disabled={isLoading}
           />
           <Icon 
@@ -129,7 +129,7 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
       {/* Password Field */}
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
-          Password
+          Пароль
         </label>
         <div className="relative">
           <input
@@ -139,7 +139,7 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
             value={formData.password}
             onChange={handleInputChange}
             className={`input-field w-full pl-10 pr-10 ${errors.password ? 'border-error-500 focus:ring-error-500' : ''}`}
-            placeholder="Enter your password"
+            placeholder="Введите ваш пароль"
             disabled={isLoading}
           />
           <Icon 
@@ -172,7 +172,7 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
             className="rounded border-border focus:ring-primary-500 focus:border-primary-500"
             disabled={isLoading}
           />
-          <span className="text-sm text-text-secondary">Remember me</span>
+          <span className="text-sm text-text-secondary">Запомнить меня</span>
         </label>
         
         <button
@@ -181,7 +181,7 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
           className="text-sm text-primary hover:underline"
           disabled={isLoading}
         >
-          Forgot password?
+          Забыли пароль?
         </button>
       </div>
 
@@ -201,12 +201,12 @@ const LoginForm = ({ onSuccess, isLoading, setIsLoading }) => {
         {isLoading ? (
           <>
             <Icon name="Loader2" size={18} className="animate-spin" />
-            <span>Signing In...</span>
+            <span>Выполняем вход...</span>
           </>
         ) : (
           <>
             <Icon name="LogIn" size={18} />
-            <span>Sign In</span>
+            <span>Войти</span>
           </>
         )}
       </button>

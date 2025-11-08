@@ -284,7 +284,7 @@ const LotDetailsOffers = () => {
                 <span>{statusMessage}</span>
               </div>
               <button onClick={() => setStatusMessage(null)} className="text-sm text-text-secondary hover:text-text-primary">
-                Dismiss
+                Отклонить
               </button>
             </div>
           )}
@@ -338,7 +338,7 @@ const LotDetailsOffers = () => {
                         {request.deadlineAt && (
                           <span className="inline-flex items-center space-x-1">
                             <Icon name="Calendar" size={14} />
-                            <span>Needed by {new Date(request.deadlineAt).toLocaleDateString()}</span>
+                            <span>Нужен до {new Date(request.deadlineAt).toLocaleDateString()}</span>
                           </span>
                         )}
                       </div>
@@ -346,13 +346,13 @@ const LotDetailsOffers = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100">
-                        <p className="text-xs uppercase tracking-wide text-text-secondary">Budget</p>
+                        <p className="text-xs uppercase tracking-wide text-text-secondary">Бюджет</p>
                         <p className="text-xl font-semibold text-text-primary">
                           {formatCurrency(request.budgetAmount, request.currencyCode)}
                         </p>
                       </div>
                       <div className="p-4 rounded-lg bg-secondary-50 border border-secondary-100">
-                        <p className="text-xs uppercase tracking-wide text-text-secondary">Status</p>
+                        <p className="text-xs uppercase tracking-wide text-text-secondary">Статус</p>
                         <p className="text-sm font-medium text-text-primary capitalize">{request.status}</p>
                       </div>
                     </div>
@@ -372,7 +372,7 @@ const LotDetailsOffers = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">{request.buyerName || 'Buyer'}</p>
-                      <p className="text-xs text-text-secondary">Request owner</p>
+                      <p className="text-xs text-text-secondary">Создатель</p>
                     </div>
                   </div>
 
@@ -380,13 +380,13 @@ const LotDetailsOffers = () => {
                     <div className="flex items-center space-x-2">
                       <Icon name="Calendar" size={16} />
                       <span>
-                        Created {new Date(request.createdAt).toLocaleString()}
+                        Создано {new Date(request.createdAt).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Icon name="Edit3" size={16} />
                       <span>
-                        Updated {new Date(request.updatedAt).toLocaleString()}
+                        Обновлено {new Date(request.updatedAt).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -397,7 +397,7 @@ const LotDetailsOffers = () => {
                       className="w-full btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center space-x-2"
                     >
                       <Icon name="Edit" size={16} />
-                      <span>Edit lot</span>
+                      <span>Редактировать лот</span>
                     </button>
                   )}
 
@@ -405,7 +405,7 @@ const LotDetailsOffers = () => {
                     <div className="space-y-2">
                       {userOffer && (
                         <div className="status-info rounded-lg p-3 text-sm">
-                          You submitted an offer for {formatCurrency(userOffer.priceAmount, userOffer.currencyCode)}.
+                          Вы подали предложение на {formatCurrency(userOffer.priceAmount, userOffer.currencyCode)}.
                         </div>
                       )}
                       {canMakeOffer && (
@@ -414,7 +414,7 @@ const LotDetailsOffers = () => {
                           className="w-full btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center space-x-2"
                         >
                           <Icon name="Handshake" size={16} />
-                          <span>Make an offer</span>
+                          <span>Сделать предложение</span>
                         </button>
                       )}
                     </div>
@@ -425,7 +425,7 @@ const LotDetailsOffers = () => {
                       onClick={() => navigate('/login-register', { state: { from: `/lot-details-offers?id=${request.id}` } })}
                       className="w-full btn-primary px-4 py-2 rounded-lg text-sm font-medium"
                     >
-                      Sign in to make an offer
+                      Войдите, чтобы сделать предложение
                     </button>
                   )}
                 </div>
@@ -434,21 +434,21 @@ const LotDetailsOffers = () => {
           ) : (
             <div className="bg-surface border border-border rounded-xl p-10 text-center">
               <Icon name="Archive" size={40} className="mx-auto text-secondary-300 mb-4" />
-              <h2 className="text-xl font-semibold text-text-primary mb-2">Lot not found</h2>
+              <h2 className="text-xl font-semibold text-text-primary mb-2">Лот не найден</h2>
               <p className="text-text-secondary mb-4">
-                The requested lot may have been removed or is unavailable.
+                Запрошенный лот мог быть удален или недоступен.
               </p>
               <button onClick={() => navigate('/browse-lots')} className="btn-primary px-4 py-2 rounded-lg">
-                Back to browse
+                Обратно к поиску
               </button>
             </div>
           )}
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-text-primary">Offers</h2>
+              <h2 className="text-2xl font-semibold text-text-primary">Предложения</h2>
               {!loadingOffers && (
-                <span className="text-sm text-text-secondary">{offers.length} offer(s)</span>
+                <span className="text-sm text-text-secondary">{offers.length} предложений</span>
               )}
             </div>
 

@@ -24,12 +24,12 @@ const formatRelativeTime = (dateString) => {
   const now = new Date();
   const diffMs = now.getTime() - value.getTime();
   const diffMinutes = Math.round(diffMs / (1000 * 60));
-  if (diffMinutes < 1) return 'just now';
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffMinutes < 1) return 'только что';
+  if (diffMinutes < 60) return `${diffMinutes}м назад`;
   const diffHours = Math.round(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return `${diffHours}ч назад`;
   const diffDays = Math.round(diffHours / 24);
-  return `${diffDays}d ago`;
+  return `${diffDays}д назад`;
 };
 
 const LotCard = ({ lot, canMakeOffer = true }) => {
@@ -71,13 +71,13 @@ const LotCard = ({ lot, canMakeOffer = true }) => {
         <div>
           <h3 className="text-lg font-semibold text-text-primary mb-1 line-clamp-1">{lot.title}</h3>
           <p className="text-sm text-text-secondary line-clamp-2">
-            {lot.description || 'No additional details provided.'}
+            {lot.description || 'Не предоставлено дополнительное описание.'}
           </p>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-text-secondary uppercase tracking-wide">Budget</p>
+            <p className="text-xs text-text-secondary uppercase tracking-wide">Бюджет</p>
             <p className="text-lg font-semibold text-text-primary">{budgetLabel}</p>
           </div>
           {lot.status && (
@@ -92,15 +92,15 @@ const LotCard = ({ lot, canMakeOffer = true }) => {
             <div className="w-10 h-10 rounded-full overflow-hidden bg-secondary-200">
               <AppImage
                 src={lot.buyerAvatarUrl || undefined}
-                alt={lot.buyerName || 'Buyer'}
+                alt={lot.buyerName || 'Покупатель'}
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
               <p className="text-sm font-medium text-text-primary">
-                {lot.buyerName || 'Anonymous buyer'}
+                {lot.buyerName || 'Анонимный покупатель'}
               </p>
-              <p className="text-xs text-text-secondary">Request #{lot.id}</p>
+              <p className="text-xs text-text-secondary">Лот #{lot.id}</p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ const LotCard = ({ lot, canMakeOffer = true }) => {
               className="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
             >
               <Icon name="Handshake" size={16} />
-              <span>Make offer</span>
+              <span>Сделать предложение</span>
             </button>
           )}
         </div>

@@ -32,7 +32,7 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMes
           </div>
           <div>
             <p className="font-semibold text-text-primary">{offer.sellerName}</p>
-            <p className="text-xs text-text-secondary">Submitted {createdLabel}</p>
+            <p className="text-xs text-text-secondary">Подтверждено {createdLabel}</p>
           </div>
         </div>
 
@@ -56,12 +56,12 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMes
         <div className="flex items-center space-x-3 text-xs text-text-secondary">
           <span className="inline-flex items-center space-x-1">
             <Icon name="Clock" size={14} />
-            <span>Last updated {new Date(offer.updatedAt).toLocaleString()}</span>
+            <span>Последнее обновление {new Date(offer.updatedAt).toLocaleString()}</span>
           </span>
           {offer.sellerRating != null && (
             <span className="inline-flex items-center space-x-1">
               <Icon name="Star" size={14} className="text-warning-500" />
-              <span>{offer.sellerRating.toFixed(1)} rating</span>
+              <span>{offer.sellerRating.toFixed(1)} рейтинг</span>
             </span>
           )}
         </div>
@@ -73,7 +73,7 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMes
               className="px-3 py-2 rounded-lg text-sm font-medium border border-secondary-300 text-text-secondary hover:text-primary hover:border-primary flex items-center space-x-1"
             >
               <Icon name="MessageCircle" size={14} />
-              <span>Message</span>
+              <span>Сообщение</span>
             </button>
           )}
           {isSeller && (
@@ -83,14 +83,14 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMes
                 className="btn-secondary px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-1"
               >
                 <Icon name="Edit" size={14} />
-                <span>Edit</span>
+                <span>Изменить</span>
               </button>
               <button
                 onClick={() => onDelete(offer.id)}
                 className="px-3 py-2 rounded-lg text-sm font-medium border border-error-300 text-error-600 hover:bg-error-50 flex items-center space-x-1"
               >
                 <Icon name="Trash" size={14} />
-                <span>Delete</span>
+                <span>Удалить</span>
               </button>
             </>
           )}
@@ -100,7 +100,7 @@ const OfferCard = ({ offer, isOwner, isSeller, onEdit, onDelete, onAccept, onMes
               className="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
             >
               <Icon name="CheckCircle" size={16} />
-              <span>Accept</span>
+              <span>Принять</span>
             </button>
           )}
         </div>
@@ -133,7 +133,7 @@ const OffersList = ({
     return (
       <div className="bg-surface border border-border rounded-xl p-10 text-center">
         <Icon name="Inbox" size={36} className="mx-auto text-secondary-300 mb-4" />
-        <h3 className="text-lg font-semibold text-text-primary mb-2">No offers yet</h3>
+        <h3 className="text-lg font-semibold text-text-primary mb-2">Пока нет преждложений</h3>
         <p className="text-text-secondary text-sm">
           {isOwner
             ? 'Sellers will appear here when they submit offers to your lot.'

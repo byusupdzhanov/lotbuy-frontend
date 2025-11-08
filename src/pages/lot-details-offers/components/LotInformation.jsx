@@ -26,13 +26,13 @@ const LotInformation = ({ lot }) => {
     const end = new Date(deadline);
     const diff = end - now;
     
-    if (diff <= 0) return 'Expired';
+    if (diff <= 0) return 'Недействителен';
     
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     
-    if (days > 0) return `${days} days, ${hours} hours left`;
-    return `${hours} hours left`;
+    if (days > 0) return `${days} дней, ${hours} часов осталось`;
+    return `${hours} часов осталось`;
   };
 
   const truncateDescription = (text, maxLength = 300) => {
@@ -56,11 +56,11 @@ const LotInformation = ({ lot }) => {
               </span>
               <span className="flex items-center space-x-1">
                 <Icon name="Eye" size={16} />
-                <span>{lot.viewCount} views</span>
+                <span>{lot.viewCount} просмотров</span>
               </span>
               <span className="flex items-center space-x-1">
                 <Icon name="Clock" size={16} />
-                <span>Posted {formatDate(lot.timeline.created)}</span>
+                <span>Создан {formatDate(lot.timeline.created)}</span>
               </span>
             </div>
           </div>
@@ -70,13 +70,13 @@ const LotInformation = ({ lot }) => {
         <div className="bg-primary-50 border border-primary-100 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-primary mb-1">Budget Range</h3>
+              <h3 className="text-lg font-semibold text-primary mb-1">Диапазон цены</h3>
               <p className="text-2xl font-bold text-primary">
                 {formatCurrency(lot.budgetRange.min)} - {formatCurrency(lot.budgetRange.max)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-primary-700 mb-1">Deadline</p>
+              <p className="text-sm text-primary-700 mb-1">Окончание лота</p>
               <p className="font-semibold text-primary">
                 {getTimeRemaining(lot.timeline.deadline)}
               </p>
@@ -87,7 +87,7 @@ const LotInformation = ({ lot }) => {
 
       {/* Buyer Information */}
       <div className="bg-surface border border-border rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-text-primary mb-3">Buyer Information</h3>
+        <h3 className="text-lg font-semibold text-text-primary mb-3">Информация о покупателе</h3>
         <div className="flex items-center space-x-4">
           <AppImage
             src={lot.buyer.avatar}
@@ -106,8 +106,8 @@ const LotInformation = ({ lot }) => {
                 <Icon name="Star" size={14} className="text-warning-500 fill-current" />
                 <span>{lot.buyer.rating}</span>
               </div>
-              <span>{lot.buyer.totalDeals} deals completed</span>
-              <span>Joined {formatDate(lot.buyer.joinedDate)}</span>
+              <span>{lot.buyer.totalDeals} сделок завершено</span>
+              <span>На LotBuy с {formatDate(lot.buyer.joinedDate)}</span>
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@ const LotInformation = ({ lot }) => {
 
       {/* Description */}
       <div className="bg-surface border border-border rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-text-primary mb-3">Description</h3>
+        <h3 className="text-lg font-semibold text-text-primary mb-3">Описание</h3>
         <div className="prose prose-sm max-w-none text-text-secondary">
           <p className="whitespace-pre-line">
             {showFullDescription 
@@ -128,7 +128,7 @@ const LotInformation = ({ lot }) => {
               onClick={() => setShowFullDescription(!showFullDescription)}
               className="text-primary hover:underline text-sm font-medium mt-2"
             >
-              {showFullDescription ? 'Show less' : 'Read more'}
+              {showFullDescription ? 'Скрыть' : 'Больше'}
             </button>
           )}
         </div>
@@ -145,7 +145,7 @@ const LotInformation = ({ lot }) => {
                   ? 'text-primary border-b-2 border-primary' :'text-text-secondary hover:text-text-primary'
               }`}
             >
-              Specifications
+              Спецификации
             </button>
             <button
               onClick={() => setActiveSpecTab('timeline')}
@@ -153,7 +153,7 @@ const LotInformation = ({ lot }) => {
                 activeSpecTab === 'timeline' ?'text-primary border-b-2 border-primary' :'text-text-secondary hover:text-text-primary'
               }`}
             >
-              Timeline
+              Таймлайн
             </button>
             <button
               onClick={() => setActiveSpecTab('location')}
@@ -161,7 +161,7 @@ const LotInformation = ({ lot }) => {
                 activeSpecTab === 'location' ?'text-primary border-b-2 border-primary' :'text-text-secondary hover:text-text-primary'
               }`}
             >
-              Location
+              Местоположение
             </button>
           </div>
         </div>
@@ -185,7 +185,7 @@ const LotInformation = ({ lot }) => {
                   <Icon name="Calendar" size={16} className="text-success-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-text-primary">Lot Created</p>
+                  <p className="font-medium text-text-primary">Лот создан</p>
                   <p className="text-sm text-text-secondary">{formatDate(lot.timeline.created)}</p>
                 </div>
               </div>
@@ -194,7 +194,7 @@ const LotInformation = ({ lot }) => {
                   <Icon name="Clock" size={16} className="text-warning-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-text-primary">Preferred Delivery</p>
+                  <p className="font-medium text-text-primary">Предпочтительная доставка</p>
                   <p className="text-sm text-text-secondary">{formatDate(lot.timeline.preferredDelivery)}</p>
                 </div>
               </div>
@@ -203,7 +203,7 @@ const LotInformation = ({ lot }) => {
                   <Icon name="AlertCircle" size={16} className="text-error-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-text-primary">Deadline</p>
+                  <p className="font-medium text-text-primary">Крайний срок</p>
                   <p className="text-sm text-text-secondary">{formatDate(lot.timeline.deadline)}</p>
                 </div>
               </div>
@@ -219,7 +219,7 @@ const LotInformation = ({ lot }) => {
                     {lot.location.city}, {lot.location.state}, {lot.location.country}
                   </p>
                   <p className="text-sm text-text-secondary mt-1">
-                    Pickup or delivery location
+                    Место самовывоза или доставки
                   </p>
                 </div>
               </div>
@@ -262,17 +262,17 @@ const LotInformation = ({ lot }) => {
         <div className="text-center p-4 bg-surface border border-border rounded-lg">
           <Icon name="Eye" size={24} className="text-primary mx-auto mb-2" />
           <p className="text-2xl font-bold text-text-primary">{lot.viewCount}</p>
-          <p className="text-sm text-text-secondary">Views</p>
+          <p className="text-sm text-text-secondary">Просмотров</p>
         </div>
         <div className="text-center p-4 bg-surface border border-border rounded-lg">
           <Icon name="DollarSign" size={24} className="text-success-500 mx-auto mb-2" />
           <p className="text-2xl font-bold text-text-primary">{lot.offerCount}</p>
-          <p className="text-sm text-text-secondary">Offers</p>
+          <p className="text-sm text-text-secondary">Предложений</p>
         </div>
         <div className="text-center p-4 bg-surface border border-border rounded-lg">
           <Icon name="Bookmark" size={24} className="text-warning-500 mx-auto mb-2" />
           <p className="text-2xl font-bold text-text-primary">{lot.savedCount}</p>
-          <p className="text-sm text-text-secondary">Saved</p>
+          <p className="text-sm text-text-secondary">Сохранений</p>
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ const FilterChips = ({ filters, searchQuery, onFilterRemove }) => {
     if (searchQuery) {
       active.push({
         key: 'search',
-        label: `Search: "${searchQuery}"`,
+        label: `Поиск: "${searchQuery}"`,
         value: searchQuery
       });
     }
@@ -16,7 +16,7 @@ const FilterChips = ({ filters, searchQuery, onFilterRemove }) => {
     if (filters.category) {
       active.push({
         key: 'category',
-        label: `Category: ${filters.category}`,
+        label: `Категория: ${filters.category}`,
         value: filters.category
       });
     }

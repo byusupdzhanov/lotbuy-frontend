@@ -29,18 +29,18 @@ const PendingOffers = ({ offers = [], onViewOffer, onMessageSeller }) => {
   return (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-text-primary">Pending Offers</h2>
+        <h2 className="text-xl font-semibold text-text-primary">Полученные предложения</h2>
         <button className="text-sm text-primary hover:underline">
-          View All Offers
+          Посмотреть все
         </button>
       </div>
 
       {offers.length === 0 ? (
         <div className="text-center py-8">
           <Icon name="DollarSign" size={48} className="text-secondary-300 mx-auto mb-3" />
-          <p className="text-text-secondary mb-2">No pending offers</p>
+          <p className="text-text-secondary mb-2">Нет предложений</p>
           <p className="text-sm text-text-secondary">
-            Offers from sellers will appear here
+            Предложения от продавцов появятся здесь
           </p>
         </div>
       ) : (
@@ -89,7 +89,7 @@ const PendingOffers = ({ offers = [], onViewOffer, onMessageSeller }) => {
                 <button
                   onClick={(e) => handleMessageSeller(item, e)}
                   className="p-2 text-text-secondary hover:text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200"
-                  title="Message seller"
+                  title="Написать продавцу"
                 >
                   <Icon name="MessageCircle" size={16} />
                 </button>
@@ -103,14 +103,14 @@ const PendingOffers = ({ offers = [], onViewOffer, onMessageSeller }) => {
 
               <div className="flex items-center justify-between">
                 <button className="text-sm text-primary hover:underline font-medium">
-                  View Details
+                  Посмотреть детали
                 </button>
                 <div className="flex items-center space-x-2">
                   <button className="px-3 py-1 text-xs bg-error-50 text-error-600 rounded-full hover:bg-error-100 transition-colors duration-200">
-                    Decline
+                    Отклонить
                   </button>
                   <button className="px-3 py-1 text-xs bg-success-50 text-success-600 rounded-full hover:bg-success-100 transition-colors duration-200">
-                    Accept
+                    Принять
                   </button>
                 </div>
               </div>

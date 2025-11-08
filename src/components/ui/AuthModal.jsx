@@ -76,33 +76,33 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = 'Пожалуйста введите корректный email';
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Пароль обязателен';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Пароль должен быть не менее 6 символов';
     }
 
     // Register-specific validation
     if (mode === 'register') {
       if (!formData.firstName) {
-        newErrors.firstName = 'First name is required';
+        newErrors.firstName = 'Имя обязательно';
       }
       if (!formData.lastName) {
-        newErrors.lastName = 'Last name is required';
+        newErrors.lastName = 'Фамилия обязательна';
       }
       if (!formData.confirmPassword) {
-        newErrors.confirmPassword = 'Please confirm your password';
+        newErrors.confirmPassword = 'Пожалуйста подтвердите пароль';
       } else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
+        newErrors.confirmPassword = 'Пароли не совпадают';
       }
       if (!formData.acceptTerms) {
-        newErrors.acceptTerms = 'You must accept the terms and conditions';
+        newErrors.acceptTerms = 'Вы должны принять условия обслуживания';
       }
     }
 
@@ -183,7 +183,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-text-primary mb-2">
-                  First Name
+                  Имя
                 </label>
                 <input
                   type="text"
@@ -200,7 +200,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-text-primary mb-2">
-                  Last Name
+                  Фамилия
                 </label>
                 <input
                   type="text"
@@ -221,7 +221,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
-              Email Address
+              Email
             </label>
             <input
               type="email"
@@ -240,7 +240,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
           {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
-              Password
+              Пароль
             </label>
             <input
               type="password"
@@ -260,7 +260,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
           {mode === 'register' && (
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary mb-2">
-                Confirm Password
+                Подтверждение пароля
               </label>
               <input
                 type="password"
@@ -291,13 +291,13 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                   }`}
                 />
                 <span className="text-sm text-text-secondary">
-                  I agree to the{' '}
+                  Я соглашаюсь с{' '}
                   <button type="button" className="text-primary hover:underline">
-                    Terms of Service
+                    Условия обслуживания
                   </button>{' '}
                   and{' '}
                   <button type="button" className="text-primary hover:underline">
-                    Privacy Policy
+                    Политика конфиденциальности
                   </button>
                 </span>
               </label>
@@ -338,7 +338,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                 className="text-sm text-primary hover:underline"
                 onClick={() => console.log('Forgot password')}
               >
-                Forgot your password?
+                Забыли пароль?
               </button>
             </div>
           )}

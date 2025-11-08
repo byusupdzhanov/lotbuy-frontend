@@ -59,8 +59,8 @@ const LoginRegister = () => {
               <Icon name="Gavel" size={24} color="white" />
             </div>
             <div className="text-left">
-              <h1 className="text-2xl font-bold text-text-primary">PeerAuction</h1>
-              <p className="text-sm text-text-secondary">Peer-to-peer marketplace</p>
+              <h1 className="text-2xl font-bold text-text-primary">LotBuy</h1>
+              <p className="text-sm text-text-secondary">Обратный спрос</p>
             </div>
           </button>
         </div>
@@ -72,10 +72,10 @@ const LoginRegister = () => {
           {/* Welcome Message */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-text-primary mb-2">
-              {activeTab === 'login' ? 'Welcome Back' : 'Join PeerAuction'}
+              {activeTab === 'login' ? 'С возвращением' : 'Присоединяйтесь'}
             </h2>
             <p className="text-text-secondary">
-              {activeTab === 'login' ?'Sign in to access your auction marketplace' :'Create your account to start buying and selling'
+              {activeTab === 'login' ?'Войдите в аккаунт, чтобы смотреть лоты и оставлять предложения' :'Создайте аккаунт, что прочувствовать все преимущества LotBuy'
               }
             </p>
           </div>
@@ -90,7 +90,7 @@ const LoginRegister = () => {
                   activeTab === 'login' ?'bg-surface text-text-primary shadow-sm' :'text-text-secondary hover:text-text-primary'
                 }`}
               >
-                Sign In
+                Войти
               </button>
               <button
                 onClick={() => handleTabChange('register')}
@@ -98,7 +98,7 @@ const LoginRegister = () => {
                   activeTab === 'register' ?'bg-surface text-text-primary shadow-sm' :'text-text-secondary hover:text-text-primary'
                 }`}
               >
-                Create Account
+                Создать аккаунт
               </button>
             </div>
 
@@ -126,10 +126,10 @@ const LoginRegister = () => {
           {/* Additional Links */}
           <div className="text-center mt-6 space-y-2">
             <p className="text-sm text-text-secondary">
-              By continuing, you agree to our{' '}
-              <button className="text-primary hover:underline">Terms of Service</button>
-              {' '}and{' '}
-              <button className="text-primary hover:underline">Privacy Policy</button>
+              Продолжая, вы соглашаетесь с{' '}
+              <button className="text-primary hover:underline">Условия обслуживания</button>
+              {' '}и{' '}
+              <button className="text-primary hover:underline">Политика конфиденциальности</button>
             </p>
             
             <div className="pt-4">
@@ -137,7 +137,7 @@ const LoginRegister = () => {
                 onClick={() => navigate('/browse-lots')}
                 className="text-sm text-primary hover:underline"
               >
-                Browse lots without signing in
+                Смотреть лоты без входа
               </button>
             </div>
           </div>
@@ -148,7 +148,7 @@ const LoginRegister = () => {
       <footer className="py-6 px-4 border-t border-border">
         <div className="max-w-md mx-auto text-center">
           <p className="text-xs text-text-secondary">
-            © {new Date().getFullYear()} PeerAuction. All rights reserved.
+            © {new Date().getFullYear()} ООО "ЛотБай". Все права защищены.
           </p>
         </div>
       </footer>

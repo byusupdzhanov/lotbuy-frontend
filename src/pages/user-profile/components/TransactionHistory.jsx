@@ -16,22 +16,22 @@ const TransactionHistory = ({ deals = [] }) => {
     return (
       <div className="card p-6 text-center text-text-secondary">
         <Icon name="Archive" size={32} className="mx-auto mb-3 text-secondary-300" />
-        <p>You have not completed any deals yet.</p>
+        <p>У вас еще нет выполненных сделок.</p>
       </div>
     );
   }
 
   return (
     <div className="card p-6 space-y-4">
-      <h3 className="text-lg font-semibold text-text-primary">Recent Deals</h3>
+      <h3 className="text-lg font-semibold text-text-primary">Недавние сделки</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="text-left text-text-secondary uppercase tracking-wide">
-              <th className="py-3 pr-4">Lot</th>
-              <th className="py-3 pr-4">Offer</th>
-              <th className="py-3 pr-4">Status</th>
-              <th className="py-3 pr-4">Updated</th>
+              <th className="py-3 pr-4">Лот</th>
+              <th className="py-3 pr-4">Предложение</th>
+              <th className="py-3 pr-4">Статус</th>
+              <th className="py-3 pr-4">Обновлено</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">

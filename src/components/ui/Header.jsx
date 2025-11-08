@@ -20,31 +20,31 @@ const Header = () => {
 
   const navigationItems = [
     {
-      label: 'Home',
+      label: 'Главная',
       path: '/dashboard-home',
       icon: 'Home',
       tooltip: 'Dashboard overview'
     },
     {
-      label: 'Browse',
+      label: 'Поиск',
       path: '/browse-lots',
       icon: 'Search',
       tooltip: 'Find lots to bid on'
     },
     {
-      label: 'Deals',
+      label: 'Сделки',
       path: '/deals',
       icon: 'Handshake',
       tooltip: 'Manage your active deals'
     },
     {
-      label: 'Create',
+      label: 'Создать лот',
       path: '/create-lot',
       icon: 'Plus',
       tooltip: 'Create new lot'
     },
     {
-      label: 'Profile',
+      label: 'Профиль',
       path: '/user-profile',
       icon: 'User',
       tooltip: 'Manage your account'
@@ -226,7 +226,7 @@ const Header = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
-                  placeholder="Search lots..."
+                  placeholder="Поиск лотов..."
                   className={`w-full pl-10 pr-4 py-2 border rounded-lg transition-all duration-200 ${
                     isSearchFocused
                       ? 'border-primary-500 ring-2 ring-primary-100' :'border-border hover:border-secondary-300'
@@ -267,16 +267,16 @@ const Header = () => {
               {notificationsOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-xl shadow-xl overflow-hidden z-100">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                    <span className="font-semibold text-sm text-text-primary">Notifications</span>
+                    <span className="font-semibold text-sm text-text-primary">Уведомления</span>
                     {notificationCount > 0 && (
-                      <span className="text-xs text-text-secondary">{notificationCount} unread</span>
+                      <span className="text-xs text-text-secondary">{notificationCount} непрочитанных</span>
                     )}
                   </div>
                   <div className="max-h-80 overflow-y-auto">
                     {loadingNotifications ? (
-                      <div className="py-6 text-center text-text-secondary text-sm">Loading...</div>
+                      <div className="py-6 text-center text-text-secondary text-sm">Загрузка...</div>
                     ) : notifications.length === 0 ? (
-                      <div className="py-6 text-center text-text-secondary text-sm">No notifications yet</div>
+                      <div className="py-6 text-center text-text-secondary text-sm">Нет уведомлений</div>
                     ) : (
                       notifications.map((item) => (
                         <button

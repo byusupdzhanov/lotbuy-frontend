@@ -110,7 +110,7 @@ const UserProfile = () => {
   const tabs = [
     {
       id: 'profile',
-      label: 'Profile Info',
+      label: 'Информация',
       icon: 'User',
       render: () => (
         <ProfileInfo
@@ -125,13 +125,13 @@ const UserProfile = () => {
     },
     {
       id: 'settings',
-      label: 'Settings',
+      label: 'Настройки',
       icon: 'Settings',
       render: () => <Settings />,
     },
     {
       id: 'history',
-      label: 'Transaction History',
+      label: 'История сделок',
       icon: 'History',
       render: () => (
         loadingDeals ? (
@@ -146,7 +146,7 @@ const UserProfile = () => {
     },
     {
       id: 'reviews',
-      label: 'Reviews',
+      label: 'Отзывы',
       icon: 'Star',
       render: () => <Reviews stats={stats} />,
     },
@@ -167,7 +167,7 @@ const UserProfile = () => {
                 <span>{message}</span>
               </div>
               <button onClick={() => setMessage(null)} className="text-sm text-text-secondary hover:text-text-primary">
-                Dismiss
+                Отменить
               </button>
             </div>
           )}
@@ -184,8 +184,8 @@ const UserProfile = () => {
           ) : !profile ? (
             <div className="bg-surface border border-border rounded-xl p-10 text-center">
               <Icon name="User" size={40} className="mx-auto text-secondary-300 mb-4" />
-              <h2 className="text-xl font-semibold text-text-primary mb-2">Profile unavailable</h2>
-              <p className="text-text-secondary">We could not load your profile information.</p>
+              <h2 className="text-xl font-semibold text-text-primary mb-2">Профиль недоступен</h2>
+              <p className="text-text-secondary">Мы не смогли загрузить информацию о профиле.</p>
             </div>
           ) : (
             <>
@@ -206,7 +206,7 @@ const UserProfile = () => {
                     <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
                       <span className="inline-flex items-center space-x-1">
                         <Icon name="Calendar" size={14} />
-                        <span>Member since {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '—'}</span>
+                        <span>На LotBuy с {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '—'}</span>
                       </span>
                       {getLocation(activeLots[0]) && (
                         <span className="inline-flex items-center space-x-1">
@@ -221,19 +221,19 @@ const UserProfile = () => {
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <p className="text-lg font-semibold text-text-primary">{stats.completedDeals ?? 0}</p>
-                    <p className="text-xs text-text-secondary">Deals</p>
+                    <p className="text-xs text-text-secondary">Сделок</p>
                   </div>
                   <div>
                     <p className="text-lg font-semibold text-text-primary">{stats.activeLots ?? 0}</p>
-                    <p className="text-xs text-text-secondary">Active lots</p>
+                    <p className="text-xs text-text-secondary">Активные лоты</p>
                   </div>
                   <div>
                     <p className="text-lg font-semibold text-text-primary">{stats.offersMade ?? 0}</p>
-                    <p className="text-xs text-text-secondary">Offers made</p>
+                    <p className="text-xs text-text-secondary">Сделано предложений</p>
                   </div>
                   <div>
                     <p className="text-lg font-semibold text-text-primary">{stats.pendingOffers ?? 0}</p>
-                    <p className="text-xs text-text-secondary">Pending offers</p>
+                    <p className="text-xs text-text-secondary">Получено предложений</p>
                   </div>
                 </div>
               </div>

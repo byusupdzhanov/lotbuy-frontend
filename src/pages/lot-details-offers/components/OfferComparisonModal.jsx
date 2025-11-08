@@ -19,11 +19,11 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
     const date = new Date(dateString);
     const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
     
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 1) return 'Только что';
+    if (diffInHours < 24) return `${diffInHours}ч назад`;
     
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    return `${diffInDays}д назад`;
   };
 
   const handleOfferSelection = (offer) => {
@@ -58,9 +58,9 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
-            <h2 className="text-2xl font-semibold text-text-primary">Compare Offers</h2>
+            <h2 className="text-2xl font-semibold text-text-primary">Сравнить предложения</h2>
             <p className="text-sm text-text-secondary mt-1">
-              Select up to 3 offers to compare side by side
+              Выберите до 3 предложений для сравнения ключевых характеристик и выбора лучшего варианта
             </p>
           </div>
           <button
@@ -75,7 +75,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
           {/* Offer Selection Sidebar */}
           <div className="lg:w-80 border-r border-border bg-secondary-50">
             <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-text-primary mb-2">All Offers ({offers.length})</h3>
+              <h3 className="font-semibold text-text-primary mb-2">Все предложения ({offers.length})</h3>
               <div className="flex items-center space-x-2">
                 <Icon name="ArrowUpDown" size={16} className="text-text-secondary" />
                 <select
@@ -83,9 +83,9 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="text-sm border border-border rounded px-2 py-1 bg-background"
                 >
-                  <option value="price">Price</option>
-                  <option value="rating">Rating</option>
-                  <option value="recent">Most Recent</option>
+                  <option value="price">Цена</option>
+                  <option value="rating">Рейтинг</option>
+                  <option value="recent">Дата публикации</option>
                 </select>
               </div>
             </div>
@@ -148,10 +148,10 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                 <div className="text-center">
                   <Icon name="BarChart3" size={48} className="text-secondary-300 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-text-primary mb-2">
-                    Select offers to compare
+                    Выберите предложения для сравнения
                   </h3>
                   <p className="text-text-secondary">
-                    Choose up to 3 offers from the sidebar to see a detailed comparison
+                    Выберите до 3 предложений из левой панели, чтобы увидеть их ключевые характеристики и помочь вам принять решение
                   </p>
                 </div>
               </div>
@@ -163,7 +163,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                     <div className="flex items-center space-x-2">
                       <Icon name="Award" size={20} className="text-success-600" />
                       <span className="font-semibold text-success-800">
-                        Best Value: {getBestValue().seller.name} - {formatCurrency(getBestValue().price)}
+                        Лучшее предложение: {getBestValue().seller.name} - {formatCurrency(getBestValue().price)}
                       </span>
                     </div>
                   </div>
@@ -202,7 +202,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                             </div>
                             {isBestValue && (
                               <div className="bg-success-100 text-success-800 px-2 py-1 rounded text-xs font-medium">
-                                Best Value
+                                Лучшее предложение
                               </div>
                             )}
                           </div>
@@ -213,29 +213,29 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                               {formatCurrency(offer.price)}
                             </p>
                             <p className="text-sm text-text-secondary">
-                              Score: {getComparisonScore(offer)}/100
+                              Оценка: {getComparisonScore(offer)}/100
                             </p>
                           </div>
 
                           {/* Key Metrics */}
                           <div className="space-y-3 mb-4">
                             <div className="flex justify-between">
-                              <span className="text-sm text-text-secondary">Response Time</span>
+                              <span className="text-sm text-text-secondary">Время ответа</span>
                               <span className="text-sm font-medium">{offer.seller.responseTime}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-sm text-text-secondary">Total Sales</span>
+                              <span className="text-sm text-text-secondary">Всего продаж</span>
                               <span className="text-sm font-medium">{offer.seller.totalSales}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-sm text-text-secondary">Location</span>
+                              <span className="text-sm text-text-secondary">Местоположение</span>
                               <span className="text-sm font-medium">{offer.seller.location}</span>
                             </div>
                           </div>
 
                           {/* Delivery Options */}
                           <div className="mb-4">
-                            <h5 className="text-sm font-medium text-text-primary mb-2">Delivery</h5>
+                            <h5 className="text-sm font-medium text-text-primary mb-2">Доставка</h5>
                             <div className="space-y-1">
                               {offer.deliveryOptions.map((option, index) => (
                                 <div key={index} className="flex items-center space-x-2 text-xs">
@@ -260,17 +260,17 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                             <div className="flex flex-wrap gap-1">
                               {offer.warranty && (
                                 <span className="px-2 py-1 bg-success-100 text-success-700 rounded text-xs">
-                                  Warranty
+                                  Гарантия
                                 </span>
                               )}
                               {offer.additionalServices && offer.additionalServices.length > 0 && (
                                 <span className="px-2 py-1 bg-primary-100 text-primary-700 rounded text-xs">
-                                  +{offer.additionalServices.length} extras
+                                  +{offer.additionalServices.length} доп.
                                 </span>
                               )}
                               {offer.images && offer.images.length > 0 && (
                                 <span className="px-2 py-1 bg-secondary-100 text-secondary-700 rounded text-xs">
-                                  {offer.images.length} photos
+                                  {offer.images.length} изображений
                                 </span>
                               )}
                             </div>
@@ -282,13 +282,13 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                               onClick={() => onSelectOffer(offer)}
                               className="btn-primary w-full py-2 rounded text-sm font-medium"
                             >
-                              Accept Offer
+                              Принять предложение
                             </button>
                             <button
                               onClick={() => console.log('Message seller:', offer.seller.name)}
                               className="btn-secondary w-full py-2 rounded text-sm font-medium"
                             >
-                              Message Seller
+                              Написать продавцу
                             </button>
                           </div>
                         </div>
@@ -299,13 +299,13 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                   {/* Detailed Comparison Table */}
                   {selectedOffers.length > 1 && (
                     <div className="mt-8">
-                      <h3 className="text-lg font-semibold text-text-primary mb-4">Detailed Comparison</h3>
+                      <h3 className="text-lg font-semibold text-text-primary mb-4">Детальное сравнение</h3>
                       <div className="overflow-x-auto">
                         <table className="w-full border border-border rounded-lg">
                           <thead className="bg-secondary-50">
                             <tr>
                               <th className="text-left p-3 border-b border-border font-medium text-text-primary">
-                                Feature
+                                Особенности
                               </th>
                               {selectedOffers.map((offer) => (
                                 <th key={offer.id} className="text-left p-3 border-b border-border font-medium text-text-primary">
@@ -316,7 +316,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                           </thead>
                           <tbody>
                             <tr>
-                              <td className="p-3 border-b border-border font-medium">Price</td>
+                              <td className="p-3 border-b border-border font-medium">Цена</td>
                               {selectedOffers.map((offer) => (
                                 <td key={offer.id} className="p-3 border-b border-border">
                                   <span className="font-bold text-primary">
@@ -326,7 +326,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                               ))}
                             </tr>
                             <tr>
-                              <td className="p-3 border-b border-border font-medium">Rating</td>
+                              <td className="p-3 border-b border-border font-medium">Рейтинг</td>
                               {selectedOffers.map((offer) => (
                                 <td key={offer.id} className="p-3 border-b border-border">
                                   <div className="flex items-center space-x-1">
@@ -337,7 +337,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                               ))}
                             </tr>
                             <tr>
-                              <td className="p-3 border-b border-border font-medium">Response Time</td>
+                              <td className="p-3 border-b border-border font-medium">Время ответа</td>
                               {selectedOffers.map((offer) => (
                                 <td key={offer.id} className="p-3 border-b border-border">
                                   {offer.seller.responseTime}
@@ -345,7 +345,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                               ))}
                             </tr>
                             <tr>
-                              <td className="p-3 border-b border-border font-medium">Warranty</td>
+                              <td className="p-3 border-b border-border font-medium">Гарантия</td>
                               {selectedOffers.map((offer) => (
                                 <td key={offer.id} className="p-3 border-b border-border">
                                   {offer.warranty || 'Not specified'}
@@ -353,7 +353,7 @@ const OfferComparisonModal = ({ offers = [], onClose, onSelectOffer }) => {
                               ))}
                             </tr>
                             <tr>
-                              <td className="p-3 font-medium">Timeline</td>
+                              <td className="p-3 font-medium">Таймлайн</td>
                               {selectedOffers.map((offer) => (
                                 <td key={offer.id} className="p-3">
                                   {offer.timeline}

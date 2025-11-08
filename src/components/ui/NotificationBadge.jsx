@@ -132,7 +132,7 @@ const NotificationBadge = ({
       <button
         onClick={handleBadgeClick}
         className="relative p-2 text-text-secondary hover:text-text-primary hover:bg-secondary-100 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-        aria-label={`Notifications (${displayCount} unread)`}
+        aria-label={`Непрочитанных уведомлений (${displayCount})`}
       >
         <Icon name="Bell" size={20} />
         {displayCount > 0 && (
@@ -154,13 +154,13 @@ const NotificationBadge = ({
                   onClick={handleMarkAllRead}
                   className="text-xs text-primary hover:underline"
                 >
-                  Mark all read
+                  Пометить все как прочитанные
                 </button>
                 <button
                   onClick={handleClearAll}
                   className="text-xs text-text-secondary hover:text-error-500"
                 >
-                  Clear all
+                  Очистить все
                 </button>
               </div>
             )}
@@ -171,9 +171,9 @@ const NotificationBadge = ({
             {notifications.length === 0 ? (
               <div className="p-8 text-center">
                 <Icon name="Bell" size={48} className="text-secondary-300 mx-auto mb-3" />
-                <p className="text-text-secondary">No notifications yet</p>
+                <p className="text-text-secondary">Нет уведомлений</p>
                 <p className="text-sm text-text-secondary mt-1">
-                  We'll notify you when something important happens
+                  Мы сообщим вам, когда появятся новые уведомления
                 </p>
               </div>
             ) : (
@@ -226,7 +226,7 @@ const NotificationBadge = ({
                 }}
                 className="w-full text-center text-sm text-primary hover:underline py-2"
               >
-                View all notifications
+                Посмотреть все уведомления
               </button>
             </div>
           )}
