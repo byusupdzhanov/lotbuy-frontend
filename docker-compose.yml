@@ -28,13 +28,13 @@ services:
       # ОБРАТИ ВНИМАНИЕ: используем host=postgres (имя сервиса), не localhost
       LOTBUY_DATABASE_URL: postgres://lotuser:lotpass@postgres:5432/lotbuy?sslmode=disable
       LOTBUY_AUTH_SECRET: tbctw5Z6n4I6z0kHDteL5cmYj4WZtV3v
-      PORT: "8080"
+      PORT: "8090"
       # Добавь свои переменные (JWT_SECRET, CORS_ORIGINS и т.д.)
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8090:8090"
     restart: unless-stopped
 
   frontend:
